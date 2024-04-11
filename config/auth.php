@@ -36,9 +36,13 @@ return [
     */
 
     'guards' => [
-        'web' => [
+        'user' => [
             'driver' => 'session',
             'provider' => 'users',
+        ],
+        'karyawan' => [
+            'driver' => 'session',
+            'provider' => 'karyawans',
         ],
     ],
 
@@ -64,7 +68,10 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
-
+        'karyawans' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Karyawan::class,
+        ],
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
