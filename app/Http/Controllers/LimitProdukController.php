@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Validator;
 
 class LimitProdukController extends Controller
 {
+    public $validator_exception = [
+        'id_produk.required' => 'Id produk harus diisi',
+        'id_produk.numeric' => 'Id produk harus berupa angka',
+        'tanggal.required' => 'Tanggal harus diisi',
+        'tanggal.date' => 'Tanggal harus berupa tanggal',
+        'limit.required' => 'Limit harus diisi',
+        'limit.numeric' => 'Limit harus berupa angka',
+    ];
+
     public function getLimitProduk(String $id)
     {
         $limitProduk = LimitProduk::where('id_produk', $id)->get();
@@ -43,7 +52,7 @@ class LimitProdukController extends Controller
         ]);
     }
 
-    public function udpateLimitProduk(Request $request, String $id)
+    public function updateLimitProduk(Request $request, String $id)
     {
         $data = $request->all();
         $limitProduk = LimitProduk::where('id_limit_produk', $id)->first();
@@ -58,7 +67,7 @@ class LimitProdukController extends Controller
         $validate = Validator::make($data, [
             'tanggal' => 'date',
             'limit' => 'numeric',
-        ]);
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([
@@ -83,7 +92,7 @@ class LimitProdukController extends Controller
             'id_produk' => 'required|numeric',
             'tanggal' => 'required|date',
             'limit' => 'required|numeric',
-        ]);
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([
@@ -120,4 +129,3 @@ class LimitProdukController extends Controller
         ]);
     }
 }
-

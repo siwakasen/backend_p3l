@@ -11,8 +11,25 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
+use function Psy\debug;
+
 class HampersController extends Controller
 {
+    public $validator_exception = [
+        'nama_hampers.required' => 'Nama hampers harus diisi!',
+        'nama_hampers.unique' => 'Nama hampers sudah terdaftar!',
+        'nama_hampers.string' => 'Nama hampers harus berupa huruf!',
+        'harga_hampers.required' => 'Harga hampers harus diisi!',
+        'harga_hampers.numeric' => 'Harga hampers harus berupa angka!',
+        'deskripsi_hampers.required' => 'Deskripsi hampers harus diisi!',
+        'deskripsi_hampers.string' => 'Deskripsi hampers harus berupa huruf!',
+        'foto_hampers.required' => 'Foto hampers harus diisi!',
+        'foto_hampers.mimes' => 'Foto hampers harus berupa file jpg, png, jpeg!',
+        'foto_hampers.max' => 'Foto hampers maksimal 2MB!',
+        'detail_hampers.required' => 'Detail hampers harus diisi!',
+        'detail_hampers.array' => 'Detail hampers harus berupa array!'
+    ];
+
     public function getAllHampers()
     {
         $hampers = Hampers::all();
@@ -79,24 +96,13 @@ class HampersController extends Controller
             ], 404);
         }
 
-        if (($data['nama_hampers'] != $hampers->nama_hampers) && ($data['nama_hampers'] != null)) {
-            $compare = Hampers::where('nama_hampers', $data['nama_hampers'])->first();
-            if ($compare) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Hampers already exist',
-                    'data' => null
-                ], 400);
-            }
-        }
-
         $validate = Validator::make($data, [
-            'nama_hampers' => 'string',
+            'nama_hampers' => 'string|unique:hampers,nama_hampers,' . $id . ',id_hampers',
             'harga_hampers' => 'numeric',
             'deskripsi_hampers' => 'string',
             'foto_hampers' => 'mimes:jpg,png,jpeg|max:2048',
-        ]);
-
+            'detail_hampers' => 'required|array',
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([
@@ -106,11 +112,10 @@ class HampersController extends Controller
             ], 400);
         }
 
-        if ($request->file('foto_hampers') != null) {
+        if (!is_null($request->file('foto_hampers'))) {
             Storage::disk('public')->delete($hampers->foto_hampers);
             $guessExtension = $request->file('foto_hampers')->guessExtension();
-            $path = null;
-            if ($request->input('nama_hampers') != null) {
+            if (!is_null($request->input('nama_hampers'))) {
                 $path = $request->file('foto_hampers')->storeAs('hampers', Str::slug($data['nama_hampers']) . '.' . $guessExtension, 'public');
             } else {
                 $path = $request->file('foto_hampers')->storeAs('hampers', Str::slug($hampers['nama_hampers']) . '.' . $guessExtension, 'public');
@@ -118,7 +123,7 @@ class HampersController extends Controller
             $data['foto_hampers'] = $path;
         }
 
-        if ($request->input('nama_hampers') != null && $request->file('foto_hampers') == null) {
+        if (!is_null($request->input('nama_hampers')) && is_null($request->file('foto_hampers'))) {
             $filename = explode('/', $hampers->foto_hampers);
             $extension = explode('.', $filename[1]);
             $path = $filename[0] . '/' . Str::slug($data['nama_hampers']) . '.' . $extension[1];
@@ -127,30 +132,46 @@ class HampersController extends Controller
         }
 
         $hampers->update($data);
+
+        DetailHampers::where('id_hampers', $id)->delete();
+
+        foreach ($data['detail_hampers'] as $detail) {
+            DetailHampers::create([
+                'id_hampers' => $hampers->id_hampers,
+                'id_produk' => $detail['id_produk'] ?? null,
+                'id_bahan_baku' => $detail['id_bahan_baku'] ?? null,
+            ]);
+        }
+
+        $hampers = Hampers::find($hampers->id_hampers);
+        $detail_hampers = DetailHampers::where('id_hampers', $hampers->id_hampers)->get();
+        $payload = [
+            'id_hampers' => $hampers->id_hampers,
+            'nama_hampers' => $hampers->nama_hampers,
+            'harga_hampers' => $hampers->harga_hampers,
+            'deskripsi_hampers' => $hampers->deskripsi_hampers,
+            'foto_hampers' => $hampers->foto_hampers,
+            'created_at' => $hampers->created_at,
+            'updated_at' => $hampers->updated_at,
+            'detail_hampers' => $detail_hampers,
+        ];
         return response()->json([
             'status' => true,
             'message' => 'Success update hampers',
-            'data' => $hampers,
+            'data' => $payload,
         ]);
     }
 
     public function insertHampers(Request $request)
     {
         $data = $request->all();
-        $compare = Hampers::where('nama_hampers', $data['nama_hampers'])->first();
-        if ($compare) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Hampers already exist',
-                'data' => null
-            ], 400);
-        }
         $validate = Validator::make($data, [
-            'nama_hampers' => 'required|string',
+            'nama_hampers' => 'required|string|unique:hampers',
             'harga_hampers' => 'required|numeric',
             'deskripsi_hampers' => 'required|string',
             'foto_hampers' => 'required|mimes:jpg,png,jpeg|max:2048',
-        ]);
+            'detail_hampers' => 'required|array',
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([
@@ -164,21 +185,33 @@ class HampersController extends Controller
         $path = $request->file('foto_hampers')->storeAs('hampers', Str::slug($data['nama_hampers']) . '.' . $guessExtension, 'public');
         $data['foto_hampers'] = $path;
 
-
-
         $hampers = Hampers::create($data);
-        $data = [
-            ['id_hampers' => $hampers->id_hampers, 'id_bahan_baku' => 19],
-            ['id_hampers' => $hampers->id_hampers, 'id_bahan_baku' => 20],
-        ];
-        foreach ($data as $d) {
-            DetailHampers::create($d);
+
+        foreach ($data['detail_hampers'] as $detail) {
+            DetailHampers::create([
+                'id_hampers' => $hampers->id_hampers,
+                'id_produk' => $detail['id_produk'] ?? null,
+                'id_bahan_baku' => $detail['id_bahan_baku'] ?? null,
+            ]);
         }
+
+        $hampers = Hampers::find($hampers->id_hampers);
+        $detail_hampers = DetailHampers::where('id_hampers', $hampers->id_hampers)->get();
+        $payload = [
+            'id_hampers' => $hampers->id_hampers,
+            'nama_hampers' => $hampers->nama_hampers,
+            'harga_hampers' => $hampers->harga_hampers,
+            'deskripsi_hampers' => $hampers->deskripsi_hampers,
+            'foto_hampers' => $hampers->foto_hampers,
+            'created_at' => $hampers->created_at,
+            'updated_at' => $hampers->updated_at,
+            'detail_hampers' => $detail_hampers,
+        ];
         return response()->json([
             'status' => true,
             'message' => 'Success insert a hampers',
-            'data' => $hampers
-        ]);
+            'data' => $payload
+        ], 201);
     }
 
     public function deleteHampers(Request $request, String $id)
@@ -217,166 +250,6 @@ class HampersController extends Controller
             'status' => true,
             'message' => 'Success search hampers',
             'data' => $hampers
-        ]);
-    }
-
-    public function getAllDetailHampers()
-    {
-        $datas = DetailHampers::all();
-        if (!$datas) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Detail Hampers not found',
-                'data' => null
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Success retrive all detail hampers',
-            'data' => $datas
-        ]);
-    }
-
-    public function getDetailHampers(Request $request, $id)
-    {
-        $detailHampers = DetailHampers::where('id_hampers', $id)->get();
-        if (!$detailHampers) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Detail Hampers not found',
-                'data' => null
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Success retrive a detail hampers',
-            'data' => $detailHampers
-        ]);
-    }
-
-    public function searchDetailHampers(Request $request)
-    {
-        $keyword = $request->query('query');
-        $detailHampers = DetailHampers::where('id_produk', $keyword)->get();
-        if (!$detailHampers) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Detail Hampers not found',
-                'data' => null
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Success retrive a detail hampers',
-            'data' => $detailHampers
-        ]);
-    }
-
-    public function insertDetailHampers(Request $request)
-    {
-        $data = $request->all();
-        $validate = Validator::make($data, [
-            'id_hampers' => 'required|numeric',
-            'id_produk' => 'required|numeric',
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid input',
-                'errors' => $validate->errors(),
-            ], 400);
-        }
-
-        $produk = Produk::find($data['id_produk']);
-        if (!$produk) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Produk not found',
-                'data' => null
-            ], 404);
-        }
-
-        $detailHampers = DetailHampers::create($data);
-        $payload = [
-            'id_hampers' => $detailHampers->id_hampers,
-            'id_produk' => $detailHampers->id_produk,
-            'created_at' => $detailHampers->created_at,
-            'updated_at' => $detailHampers->updated_at,
-        ];
-        return response()->json([
-            'status' => true,
-            'message' => 'Success insert detail hampers',
-            'data' => $payload
-        ]);
-    }
-
-    public function updateDetailHampers(Request $request, String $id)
-    {
-        $data = $request->all();
-        $detailHampers = DetailHampers::where('id_hampers', $id)->where('id_produk', $data['id_produk'])->first();
-        if (!$detailHampers) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Detail Hampers not found',
-                'data' => null
-            ], 404);
-        }
-
-        $validate = Validator::make($data, [
-            'id_produk' => 'numeric',
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Invalid input',
-                'errors' => $validate->errors(),
-            ], 400);
-        }
-
-        $produk = Produk::find($data['id_produk']);
-        if (!$produk) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Produk not found',
-                'data' => null
-            ], 404);
-        }
-
-        $detailHampers->update($data);
-        return response()->json([
-            'status' => true,
-            'message' => 'Success update a detail hampers',
-            'data' => $detailHampers
-        ]);
-    }
-
-    public function deleteDetailHampers(Request $request, String $id)
-    {
-        $data = $request->all();
-        $detailHampers = DetailHampers::where('id_hampers', $id)->where('id_produk', $data['id_produk'])->first();
-        if (!$detailHampers) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Detail Hampers not found',
-                'data' => null
-            ], 404);
-        }
-
-        DB::table('detail_hampers')
-            ->where('id_hampers', '=', $id)
-            ->where('id_produk', '=', $data['id_produk'])
-            ->limit(1)
-            ->delete();
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Success delete a produk hampers',
-            'data' => $detailHampers
         ]);
     }
 }

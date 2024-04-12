@@ -21,6 +21,7 @@ use App\Http\Controllers\PengeluaranLainController;
 |                   Public View                       |
 =======================================================
 */
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
@@ -97,36 +98,52 @@ Route::prefix('administrator')->group(function () {
         Route::get('/', [ProdukController::class, 'getAllProduk']);
     });
 
-Route::prefix('hampers')->group(function () {
-    Route::get('/search', [HampersController::class, 'searchHampers']);
-    Route::get('/', [HampersController::class, 'getAllHampers']);
-    Route::get('/{id}', [HampersController::class, 'getHampers']);
-    Route::put('/{id}', [HampersController::class, 'updateHampers'])->middleware('auth:sanctum', 'ability:admin');
-    Route::post('/', [HampersController::class, 'insertHampers'])->middleware('auth:sanctum', 'ability:admin');
-    Route::delete('/{id}', [HampersController::class, 'deleteHampers'])->middleware('auth:sanctum', 'ability:admin');
+
+    /*
+    =======================================================
+    |                   Hampers Management                |
+    =======================================================
+    */
+    Route::prefix('hampers')->group(function () {
+        Route::get('/search', [HampersController::class, 'searchHampers']);
+        Route::get('/', [HampersController::class, 'getAllHampers']);
+        Route::get('/{id}', [HampersController::class, 'getHampers']);
+        Route::put('/{id}', [HampersController::class, 'updateHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::post('/', [HampersController::class, 'insertHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [HampersController::class, 'deleteHampers'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                   Limit-Product Management          |
+    =======================================================
+    */
+    Route::prefix('limit-produk')->group(function () {
+        Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk']);
+        Route::get('/', [LimitProdukController::class, 'getAllLimitProduct']);
+        Route::put('/{id}', [LimitProdukController::class, 'udpateLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::post('/', [LimitProdukController::class, 'insertLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
+    });
 });
 
-Route::prefix('detail-hampers')->group(function () {
-    Route::get('/search', [DetailHampersController::class, 'searchDetailHampers']);
-    Route::get('/', [DetailHampersController::class, 'getAllDetailHampers']);
-    Route::get('/{id}', [DetailHampersController::class, 'getDetailHampers']);
-    Route::post('/', [DetailHampersController::class, 'insertDetailHampers']);
-    Route::delete('/{id}', [DetailHampersController::class, 'deleteDetailHampers']);
-});
-
-Route::prefix('pembelian-bahan-baku')->group(function () {
-    Route::get('/search', [PembelianBahanBakuController::class, 'searchPembelianBahanBaku']);
-    Route::get('/', [PembelianBahanBakuController::class, 'getAllPembelianBahanBaku']);
-    Route::get('/{id}', [PembelianBahanBakuController::class, 'getPembelianBahanBaku']);
-    Route::post('/', [PembelianBahanBakuController::class, 'insertPembelianBahanBaku']);
-    Route::delete('/{id}', [PembelianBahanBakuController::class, 'deletePembelianBahanBaku']);
-    Route::put('/{id}', [PembelianBahanBakuController::class, 'updatePembelianBahanBaku']);
-});
-
-Route::prefix('limit-produk')->group(function () {
-    Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk']);
-    Route::get('/', [LimitProdukController::class, 'getAllLimitProduct']);
-    Route::put('/{id}', [LimitProdukController::class, 'udpateLimitProduk']);
-    Route::post('/', [LimitProdukController::class, 'insertLimitProduk']);
-    Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk']);
+/*
+=======================================================
+|                   Manajer Operasional                |
+=======================================================
+*/
+Route::prefix('administrator')->group(function () {
+    /*
+    =======================================================
+    |           Management Pembelian Bahan Baku           |
+    =======================================================
+    */
+    Route::prefix('pembelian-bahan-baku')->group(function () {
+        Route::get('/search', [PembelianBahanBakuController::class, 'searchPembelianBahanBaku']);
+        Route::get('/', [PembelianBahanBakuController::class, 'getAllPembelianBahanBaku']);
+        Route::get('/{id}', [PembelianBahanBakuController::class, 'getPembelianBahanBaku']);
+        Route::post('/', [PembelianBahanBakuController::class, 'insertPembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::delete('/{id}', [PembelianBahanBakuController::class, 'deletePembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/{id}', [PembelianBahanBakuController::class, 'updatePembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+    });
 });
