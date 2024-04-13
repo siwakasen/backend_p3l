@@ -33,4 +33,8 @@ class Pesanan extends Model
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
+    public function detailPesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_pesanan', 'id_pesanan');
+    }
 }
