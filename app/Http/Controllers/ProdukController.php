@@ -69,6 +69,14 @@ class ProdukController extends Controller
     public function insertProduk(Request $request)
     {
         $produk = $request->all();
+        $compare = Produk::where('nama_produk', $produk['nama_produk'])->first();
+        if ($compare) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Produk already exist',
+                'data' => null
+            ], 400);
+        }
         $validate = Validator::make($produk, [
             'id_penitip' => 'numeric',
             'id_kategori' => 'required|numeric',
@@ -103,7 +111,6 @@ class ProdukController extends Controller
 
     public function updateProduk(Request $request, String $id)
     {
-
         $data = $request->all();
         $produk = Produk::find($id);
         if (!$produk) {
@@ -114,6 +121,16 @@ class ProdukController extends Controller
             ], 404);
         }
 
+        if (($data['nama_produk'] != $produk->nama_produk) && ($data['nama_produk'] != null)) {
+            $compare = Produk::where('nama_produk', $data['nama_produk'])->first();
+            if ($compare) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Produk already exist',
+                    'data' => null
+                ], 400);
+            }
+        }
 
         $validate = Validator::make($data, [
             'id_penitip' => 'numeric',
