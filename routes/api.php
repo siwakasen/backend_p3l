@@ -132,7 +132,7 @@ Route::prefix('administrator')->group(function () {
 |                   Manajer Operasional                |
 =======================================================
 */
-Route::prefix('administrator')->group(function () {
+Route::prefix('manajer-operasional')->group(function () {
     /*
     =======================================================
     |           Management Pembelian Bahan Baku           |
