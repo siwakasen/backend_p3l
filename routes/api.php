@@ -7,6 +7,22 @@ use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\ResepController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\HampersController;
+use App\Http\Controllers\PembelianBahanBakuController;
+use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\PenitipController;
+use App\Http\Controllers\PengeluaranLainController;
+
+/*
+=======================================================
+|                   Public View                       |
+=======================================================
+*/
+Route::prefix('auth')->group(function () {
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 /*
 =======================================================
@@ -26,6 +42,7 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [RolesController::class, 'updateRole'])->middleware('auth:sanctum', 'ability:owner');
         Route::delete('/{id}', [RolesController::class, 'deleteRole'])->middleware('auth:sanctum', 'ability:owner');
     });
+
     /*
     =======================================================
     |                   Karyawan Management               |
@@ -38,6 +55,7 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [KaryawanController::class, 'updateKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional', 'ability:owner');
         Route::delete('/{id}', [KaryawanController::class, 'deleteKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional', 'ability:owner');
     });
+
     /*
     =======================================================
     |                   Resep Management                  |
@@ -50,6 +68,7 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [ResepController::class, 'updateResep']);
         Route::delete('/{id}', [ResepController::class, 'deleteResep'])->middleware('auth:sanctum', 'ability:admin');
     });
+
     /*
     =======================================================
     |                   Presensi Management               |
@@ -62,6 +81,100 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [PresensiController::class, 'updatePresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PresensiController::class, 'deletePresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
     });
+
+    /*
+    =======================================================
+    |                   Produk Management                 |
+    =======================================================
+    */
+    Route::prefix('produk')->group(function () {
+        Route::put('/{id}', [ProdukController::class, 'updateProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::post('/', [ProdukController::class, 'insertProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [ProdukController::class, 'deleteProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/search', [ProdukController::class, 'searchProduk']);
+        Route::get('/{id}', [ProdukController::class, 'getProduk']);
+        Route::get('/', [ProdukController::class, 'getAllProduk']);
+    });
+
+    /*
+    =======================================================
+    |                   Hampers Management                |
+    =======================================================
+    */
+    Route::prefix('hampers')->group(function () {
+        Route::get('/search', [HampersController::class, 'searchHampers']);
+        Route::get('/', [HampersController::class, 'getAllHampers']);
+        Route::get('/{id}', [HampersController::class, 'getHampers']);
+        Route::put('/{id}', [HampersController::class, 'updateHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::post('/', [HampersController::class, 'insertHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [HampersController::class, 'deleteHampers'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                Pembelian Bahan Baku                 |
+    =======================================================
+    */
+    Route::prefix('pembelian-bahan-baku')->group(function () {
+        Route::get('/search', [PembelianBahanBakuController::class, 'searchPembelianBahanBaku']);
+        Route::get('/', [PembelianBahanBakuController::class, 'getAllPembelianBahanBaku']);
+        Route::get('/{id}', [PembelianBahanBakuController::class, 'getPembelianBahanBaku']);
+        Route::post('/', [PembelianBahanBakuController::class, 'insertPembelianBahanBaku']);
+        Route::delete('/{id}', [PembelianBahanBakuController::class, 'deletePembelianBahanBaku']);
+        Route::put('/{id}', [PembelianBahanBakuController::class, 'updatePembelianBahanBaku']);
+    });
+
+    /*
+    =======================================================
+    |                   Bahan Baku Management             |
+    =======================================================
+    */
+    Route::prefix('bahan-baku')->group(function (){
+        Route::get('/', [BahanBakuController::class, 'getAllBahanBaku']);
+        Route::get('/search', [BahanBakuController::class, 'searchBahanBaku']);
+        Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku']);
+        Route::post('/', [BahanBakuController::class, 'insertBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [BahanBakuController::class, 'deleteBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/{id}', [BahanBakuController::class, 'updateBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                 Penitip Management                  |
+    =======================================================
+    */
+    Route::prefix('penitip')->group(function (){
+        Route::get('/', [PenitipController::class, 'getAllPenitip']);
+        Route::get('/search', [PenitipController::class, 'searchPenitip']);
+        Route::get('/{id}', [PenitipController::class, 'getPenitip']);
+        Route::post('/', [PenitipController::class, 'insertPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/{id}', [PenitipController::class, 'updatePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::delete('/{id}', [PenitipController::class, 'deletePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+    });
+
+    /*
+    =======================================================
+    |                Pengeluaran Lain Management          |
+    =======================================================
+    */
+    Route::prefix('pengeluaran-lain')->group(function (){
+        Route::get('/', [PengeluaranLainController::class, 'getAllPengeluaranLain']);
+        Route::get('/search', [PengeluaranLainController::class, 'searchPengeluaranLain']);
+        Route::get('/{id}', [PengeluaranLainController::class, 'getPengeluaranLain']);
+        Route::post('/', [PengeluaranLainController::class, 'insertPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/{id}', [PengeluaranLainController::class, 'updatePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::delete('/{id}', [PengeluaranLainController::class, 'deletePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+    });
+
+    /*
+    =======================================================
+    |                Detail Hampers Management            |
+    =======================================================
+    */
+    Route::prefix('data-customer')->group(function (){
+        Route::get('/searchData', [CustomerController::class, 'searchDataCustomer'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/getDataHistory', [CustomerController::class, 'getHistoryPesananCustomer']);
+    });
 });
 
 /*
@@ -72,12 +185,11 @@ Route::prefix('administrator')->group(function () {
 Route::prefix('customer')->group(function () {
     /*
     =======================================================
-    |                       Auth                          |
+    |                       Register                      |
     =======================================================
     */
-    Route::prefix('auth')->group(function () {
-        Route::post('/register', [CustomerController::class, 'register']);
-    });
+    Route::post('/register', [CustomerController::class, 'register']);
+
     /*
     =======================================================
     |                       Profile                       |
@@ -87,6 +199,7 @@ Route::prefix('customer')->group(function () {
         Route::get('/{id}', [CustomerController::class, 'showData']);
         Route::put('/{id}', [CustomerController::class, 'changeProfile']);
     });
+
     /*
     =======================================================
     |                       History                       |
