@@ -12,4 +12,9 @@ class Resep extends Model
     protected $primaryKey = 'id_resep';
 
     protected $fillable = ['nama_resep'];
+
+    public function DetailResep()
+    {
+        return $this->hasMany(DetailResep::class, 'id_resep', 'id_resep');
+    }
 }
