@@ -8,7 +8,14 @@ use Illuminate\Support\Facades\Validator;
 
 class BahanBakuController extends Controller
 {
-
+    public $validator_exception = [
+        'nama_bahan_baku.required' => 'Nama bahan baku harus diisi!',
+        'nama_bahan_baku.max' => 'Nama bahan baku maksimal 255 karakter!',
+        'stok.required' => 'Stok harus diisi!',
+        'stok.numeric' => 'Stok harus berupa angka!',
+        'satuan.required' => 'Satuan harus diisi!',
+        'satuan.max' => 'Satuan maksimal 255 karakter!'
+    ];
     public function getAllBahanBaku(){
         try {
             //code...
@@ -82,10 +89,10 @@ class BahanBakuController extends Controller
             //code...
             $data =  $request->all();
             $validate = Validator::make($data, [
-                'nama_bahan_baku' => 'required|string',
+                'nama_bahan_baku' => 'required|max:255',
                 'stok' => 'required|numeric',
-                'satuan' => 'required|string',
-            ]);
+                'satuan' => 'required|max:255',
+            ], $this->validator_exception);
     
             if($validate->fails()){
                 throw new \Exception('invalid-input');
@@ -107,7 +114,8 @@ class BahanBakuController extends Controller
             }else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request'
+                    'message' => 'Invalid request',
+                    'error'=> $th->getMessage()
                 ], 400);
             }
         }
@@ -123,10 +131,10 @@ class BahanBakuController extends Controller
             }
             $data =  $request->all();
             $validate = Validator::make($data, [
-                'nama_bahan_baku' => 'required|string',
+                'nama_bahan_baku' => 'required|max:255',
                 'stok' => 'required|numeric',
-                'satuan' => 'required|string',
-            ]);
+                'satuan' => 'required|max:255',
+            ],$this->validator_exception);
             if($validate->fails()){
                 throw new \Exception('invalid-input');
             }
@@ -155,7 +163,8 @@ class BahanBakuController extends Controller
             else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request'
+                    'message' => 'Invalid request',
+                    'error'=> $th->getMessage()
                 ], 400);
             }
         }
@@ -188,7 +197,7 @@ class BahanBakuController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Failed delete bahan baku',
-                    'data' => null
+                    'error'=> $th->getMessage()
                 ], 404);
             }
         }
