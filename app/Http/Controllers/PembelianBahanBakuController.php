@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\Validator;
 
 class PembelianBahanBakuController extends Controller
 {
+    public $validator_exception = [
+        'id_bahan_baku.required' => 'Id bahan baku harus diisi',
+        'id_bahan_baku.numeric' => 'Id bahan baku harus berupa angka',
+        'jumlah.required' => 'Jumlah harus diisi',
+        'jumlah.numeric' => 'Jumlah harus berupa angka',
+        'harga.required' => 'Harga harus diisi',
+        'harga.numeric' => 'Harga harus berupa angka',
+        'tanggal_pembelian.required' => 'Tanggal pembelian harus diisi',
+        'tanggal_pembelian.date' => 'Tanggal pembelian harus berupa tanggal',
+    ];
+
     public function getAllPembelianBahanBaku()
     {
         $datas = PembelianBahanBaku::all();
@@ -72,7 +83,7 @@ class PembelianBahanBakuController extends Controller
             'jumlah' => 'required|numeric',
             'harga' => 'required|numeric',
             'tanggal_pembelian' => 'required|date',
-        ]);
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([
@@ -135,7 +146,7 @@ class PembelianBahanBakuController extends Controller
             'jumlah' => 'numeric',
             'harga' => 'numeric',
             'tanggal_pembelian' => 'date',
-        ]);
+        ], $this->validator_exception);
 
         if ($validate->fails()) {
             return response()->json([

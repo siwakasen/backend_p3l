@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('presensi', function (Blueprint $table) {
             $table->id('id_presensi');
             $table->foreignId('id_karyawan')->references('id_karyawan')->on('karyawan')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string  ('status', 255);
+            $table->string('status', 255);
             $table->date('tanggal');
             $table->timestamps();
         });

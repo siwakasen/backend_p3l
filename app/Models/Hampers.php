@@ -17,4 +17,9 @@ class Hampers extends Model
         'deskripsi_hampers',
         'harga_hampers'
     ];
+
+    public function DetailPesanan()
+    {
+        return $this->hasMany(DetailPesanan::class, 'id_hampers', 'id_hampers');
+    }
 }

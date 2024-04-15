@@ -26,4 +26,11 @@ class Karyawan extends Authenticatable
     {
         return $this->belongsTo(Roles::class, 'id_role', 'id_role');
     }
+
+    public function casts(): array
+    {
+        return [
+            'password' => 'hashed'
+        ];
+    }
 }

@@ -75,4 +75,56 @@ class AuthController extends Controller
             'data' => null,
         ], 401);
     }
+
+    /*
+    ============================================
+    |             Administrator Access         |
+    ============================================
+    */
+    public function changePassword(Request $request, string $id) {
+        $karyawan = Karyawan::find($id);
+
+        if($karyawan == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Karyawan not found.'
+            ], 404);
+        }
+
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|min:8',
+                'new_password' => 'required|min:8',
+                'confirm_password' => 'required|same:new_password',
+            ]);
+
+            if($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors()
+                ], 400);
+            }
+
+            if(!password_verify($request->password, $karyawan->password)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid password.'
+                ], 400);
+            }
+
+            $karyawan->update([
+                'password' => bcrypt($request->new_password)
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Password updated successfully.'
+            ], 200);
+        } catch(\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
 }
