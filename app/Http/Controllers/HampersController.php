@@ -226,6 +226,7 @@ class HampersController extends Controller
         }
 
         Storage::disk('public')->delete($hampers->foto_hampers);
+        DetailHampers::where('id_hampers', $id)->delete();
         $hampers->delete();
         return response()->json([
             'status' => true,
