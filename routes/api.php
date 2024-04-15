@@ -201,6 +201,15 @@ Route::prefix('administrator')->group(function () {
 Route::prefix('customer')->group(function () {
     /*
     =======================================================
+    |                   Change Password                   |
+    =======================================================
+    */
+    Route::prefix('change-password')->group(function () {
+        Route::put('/{id}', [CustomerController::class, 'changePassword']);
+    });
+    
+    /*
+    =======================================================
     |                       Profile                       |
     =======================================================
     */
