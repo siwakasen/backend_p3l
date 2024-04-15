@@ -173,7 +173,7 @@ Route::prefix('administrator')->group(function () {
     */
     Route::prefix('data-customer')->group(function (){
         Route::get('/searchData', [CustomerController::class, 'searchDataCustomer'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/getDataHistory', [CustomerController::class, 'getHistoryPesananCustomer']);
+        Route::get('/getDataHistory', [CustomerController::class, 'getHistoryPesananCustomer'])->middleware('auth:sanctum', 'ability:admin');
     });
 });
 
@@ -199,7 +199,7 @@ Route::prefix('customer')->group(function () {
         Route::get('/{id}', [CustomerController::class, 'showData']);
         Route::put('/{id}', [CustomerController::class, 'changeProfile']);
     });
-
+    
     /*
     =======================================================
     |                       History                       |
