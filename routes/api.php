@@ -189,7 +189,7 @@ Route::prefix('administrator')->group(function () {
     */
     Route::prefix('data-customer')->group(function (){
         Route::get('/searchData', [CustomerController::class, 'searchDataCustomer'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/getDataHistory', [CustomerController::class, 'getHistoryPesananCustomer'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/getDataHistory/{id}', [CustomerController::class, 'getHistoryPesananCustomer'])->middleware('auth:sanctum', 'ability:admin');
     });
 });
 
