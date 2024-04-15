@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 
 class PengeluaranLainController extends Controller
 {
+    public $validator_exception = [
+        'nama_pengeluaran.required' => 'Nama pengeluaran harus diisi!',
+        'nama_pengeluaran.max' => 'Nama pengeluaran maksimal 255 karakter!',
+        'nominal_pengeluaran.required' => 'Nominal pengeluaran harus diisi!',
+        'nominal_pengeluaran.numeric' => 'Nominal pengeluaran harus berupa angka!',
+        'tanggal_pengeluaran.required' => 'Tanggal pengeluaran harus diisi!',
+        'tanggal_pengeluaran.date' => 'Tanggal pengeluaran tidak valid!'
+    ];
     public function getAllPengeluaranLain(){
         try {
             $pengeluaran_lain = PengeluaranLain::all();
@@ -75,10 +83,10 @@ class PengeluaranLainController extends Controller
         try {
             $data = $request->all();
             $validate = Validator::make($data,[
-                'nama_pengeluaran' => 'required',
+                'nama_pengeluaran' => 'required|max:255',
                 'nominal_pengeluaran' => 'required|numeric',
                 'tanggal_pengeluaran' => 'required|date'
-            ]);
+            ],$this->validator_exception);
 
             if($validate->fails()){
                 throw new \Exception('invalid-input');
@@ -100,6 +108,7 @@ class PengeluaranLainController extends Controller
                 return response()->json([
                     'status'=>false,
                     'message'=>'Invalid request',
+                    'error'=>$th->getMessage()
                 ],400);
             }
         }
@@ -114,10 +123,10 @@ class PengeluaranLainController extends Controller
             
             $data = $request->all();
             $validate = Validator::make($data,[
-                'nama_pengeluaran' => 'required',
+                'nama_pengeluaran' => 'required|max:255',
                 'nominal_pengeluaran' => 'required|numeric',
                 'tanggal_pengeluaran' => 'required|date'
-            ]);
+            ],$this->validator_exception);
         
             if($validate->fails()){
                 throw new \Exception('invalid-input');
@@ -146,6 +155,7 @@ class PengeluaranLainController extends Controller
                 return response()->json([
                     'status'=>false,
                     'message'=>'Invalid request',
+                    'error'=>$th->getMessage()
                 ],400);
             }
         }
