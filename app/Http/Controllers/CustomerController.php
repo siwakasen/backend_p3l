@@ -222,7 +222,7 @@ class CustomerController extends Controller
         try {
             $searchkey = $request->query('query');
             $customer = User::where('nama', 'like', '%'.$searchkey.'%')->get();
-            if(!$customer){
+            if(count($customer) == 0){
                 throw new \Exception();
             }
             return response()->json([
@@ -234,7 +234,7 @@ class CustomerController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Customer not found',
-                'data' => null
+                'error'=> $th->getMessage()
             ], 404);
         }
     }
@@ -267,7 +267,7 @@ class CustomerController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Pesanan not found',
-                'data' => null
+                'error'=> $th->getMessage()
             ], 404);
         }
     }

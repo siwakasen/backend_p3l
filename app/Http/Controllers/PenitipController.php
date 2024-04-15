@@ -8,6 +8,16 @@ use Illuminate\Support\Facades\Validator;
 
 class PenitipController extends Controller
 {
+    public $validator_exception = [
+        'nama_penitip.required' => 'Nama penitip harus diisi!',
+        'nama_penitip.max' => 'Nama penitip maksimal 255 karakter!',
+        'no_hp.required' => 'Nomor HP harus diisi!',
+        'no_hp.numeric' => 'Nomor HP harus berupa angka!',
+        'no_hp.digits_between' => 'Nomor HP harus berjumlah 11-13 digit!',
+        'email.required' => 'Email harus diisi!',
+        'email.email' => 'Email tidak valid!'
+    ];
+
     public function getAllPenitip(){
         try {
             //code...
@@ -80,11 +90,11 @@ class PenitipController extends Controller
             //code...
             $data = $request->all();
             $validator = Validator::make($data, [
-                'nama_penitip' => 'required|string',
+                'nama_penitip' => 'required|max:255',
                 'no_hp' => 'required|numeric|digits_between:11,13',
                 'email' => 'required|email'
-            ]);
-
+            ], $this->validator_exception);
+            
             if($validator->fails()){
                 throw new \Exception('invalid-input');
             }
@@ -102,13 +112,12 @@ class PenitipController extends Controller
                     'status' => false,
                     'message' => 'Invalid input',
                     'error' => $validator->errors(),
-                    'data' => null
                 ], 400);
             }else{
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid request',
-                    'data' => null
+                    'error'=> $th->getMessage()
                 ], 400);
             }
         }
@@ -124,10 +133,10 @@ class PenitipController extends Controller
             
             $data = $request->all();
             $validator = Validator::make($data, [
-                'nama_penitip' => 'required|string',
+                'nama_penitip' => 'required|max:255',
                 'no_hp' => 'required|numeric|digits_between:11,13',
                 'email' => 'required|email'
-            ]);
+            ],$this->$validator_exception);
             
             if($validator->fails()){
                 throw new \Exception('invalid-input');
@@ -158,7 +167,7 @@ class PenitipController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid request',
-                    'data' => null
+                    'error'=> $th->getMessage()
                 ], 400);
             }
         }
@@ -188,7 +197,7 @@ class PenitipController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid request',
-                    'data' => null
+                    'error'=> $th->getMessage()
                 ], 400);
             }
         }
