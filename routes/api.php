@@ -21,9 +21,9 @@ use App\Http\Controllers\PengeluaranLainController;
 |                   Public View                       |
 =======================================================
 */
-
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [CustomerController::class, 'register']);
 });
 
 /*
@@ -67,7 +67,7 @@ Route::prefix('administrator')->group(function () {
         Route::get('/', [ResepController::class, 'getAllResep']);
         Route::get('/{id}', [ResepController::class, 'getResep']);
         Route::post('/', [ResepController::class, 'insertResep'])->middleware('auth:sanctum', 'ability:admin');
-        Route::put('/{id}', [ResepController::class, 'updateResep']);
+        Route::put('/{id}', [ResepController::class, 'updateResep'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [ResepController::class, 'deleteResep'])->middleware('auth:sanctum', 'ability:admin');
     });
 
@@ -199,13 +199,6 @@ Route::prefix('administrator')->group(function () {
 =======================================================
 */
 Route::prefix('customer')->group(function () {
-    /*
-    =======================================================
-    |                       Register                      |
-    =======================================================
-    */
-    Route::post('/register', [CustomerController::class, 'register']);
-
     /*
     =======================================================
     |                       Profile                       |
