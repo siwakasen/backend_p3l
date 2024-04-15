@@ -53,9 +53,9 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('karyawan')->group(function () {
         Route::get('/', [KaryawanController::class, 'getAllKaryawan']);
         Route::get('/{id}', [KaryawanController::class, 'getKaryawan']);
-        Route::post('/', [KaryawanController::class, 'insertKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional', 'ability:owner');
-        Route::put('/{id}', [KaryawanController::class, 'updateKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional', 'ability:owner');
-        Route::delete('/{id}', [KaryawanController::class, 'deleteKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional', 'ability:owner');
+        Route::post('/', [KaryawanController::class, 'insertKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::put('/{id}', [KaryawanController::class, 'updateKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::delete('/{id}', [KaryawanController::class, 'deleteKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
     });
 
     /*
@@ -191,6 +191,15 @@ Route::prefix('administrator')->group(function () {
         Route::get('/searchData', [CustomerController::class, 'searchDataCustomer'])->middleware('auth:sanctum', 'ability:admin');
         Route::get('/getDataHistory/{id}', [CustomerController::class, 'getHistoryPesananCustomer'])->middleware('auth:sanctum', 'ability:admin');
     });
+
+    /*
+    =======================================================
+    |                   Personal Profile                  |
+    =======================================================
+    */
+    Route::prefix('change-password')->group(function () {
+        Route::put('/{id}', [CustomerController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+    });
 });
 
 /*
@@ -199,15 +208,6 @@ Route::prefix('administrator')->group(function () {
 =======================================================
 */
 Route::prefix('customer')->group(function () {
-    /*
-    =======================================================
-    |                   Change Password                   |
-    =======================================================
-    */
-    Route::prefix('change-password')->group(function () {
-        Route::put('/{id}', [CustomerController::class, 'changePassword']);
-    });
-    
     /*
     =======================================================
     |                       Profile                       |

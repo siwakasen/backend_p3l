@@ -148,58 +148,6 @@ class CustomerController extends Controller
         }
     }
 
-    public function changePassword(Request $request, string $id) {
-        try{
-            $validator = Validator::make($request->all(), [
-                'password' => 'required|min:8',
-                'new_password' => 'required|min:8'
-            ],
-            [
-                'password.required' => 'Password lama harus diisi!',
-                'password.min' => 'Password lama minimal 8 karakter!',
-                'new_password.required' => 'Password baru harus diisi!',
-                'new_password.min' => 'Password baru minimal 8 karakter!'
-            ]);
-
-            if($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()
-                ], 400);
-            }
-
-            $user = User::find($id);
-
-            if($user == null) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User not found.'
-                ], 404);
-            }
-
-            if(Hash::check($request->password, $user->password)) {
-                User::where('id_user', $id)->update([
-                    'password' => Hash::make($request->new_password)
-                ]);
-
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Password updated successfully.'
-                ], 200);
-            }else{
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Password lama salah.'
-                ], 400);
-            }
-        } catch(\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error: ' . $e->getMessage()
-            ], 400);
-        }
-    }
-
     public function historyTransaction(string $id) {
         $user = User::find($id);
 
