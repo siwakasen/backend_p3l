@@ -33,23 +33,18 @@ class CustomerController extends Controller
         }
     }
 
-    public function getHistoryPesananCustomer(Request $request){
+    public function getHistoryPesananCustomer($id){
         try {
-            $searchkey = $request->query('query');
+            
             $history = Pesanan::with(['detailPesanan' => function ($query) {
                 $query->select('id_pesanan','id_produk','id_hampers', 'jumlah','subtotal')
                 ->with(['Produk' => function ($query) {
                     $query->select('id_produk', 'nama_produk',  'harga_produk');
                 },'Hampers' => function ($query) {
                     $query->select('id_hampers', 'nama_hampers', 'harga_hampers');
-                }])
-                ->without('id_pesanan');
-            },'user'=> function ($query) {
-                $query->select('id_user', 'nama','email','no_hp');
+                }]);
             }])
-            ->whereHas('user', function ($query) use ($searchkey) {
-                $query->where('nama', 'like', '%'.$searchkey.'%');
-            })
+            ->where('id_user', $id)
             ->where('status_transaksi', 'Pesanan Sudah Selesai')
             ->get();
 
