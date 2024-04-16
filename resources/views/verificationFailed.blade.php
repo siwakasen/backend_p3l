@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Password Reset Verification</title>
+    <title>Password Verification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h1, h3 {
+        h1 {
             color: #333;
             font-size: 24px;
             margin-bottom: 20px;
@@ -30,6 +30,7 @@
             font-size: 16px;
             line-height: 1.6;
             margin-bottom: 20px;
+            text-align: center;
         }
         a {
             color: #007bff;
@@ -38,16 +39,25 @@
         a:hover {
             text-decoration: underline;
         }
+        .header {
+            background-color: #a72828;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Link Verifikasi untuk reset password</h1>
-        <h3>Halo {{$details['name']}},</h3>
-        <p>Anda telah mengajukan perubahan password pada akun Anda</p>
-        <p>Untuk memverifikasi tindakan anda, silahkan mengakses link berikut agar dapat melakukan reset password</p>
-        <p>{{$details['url']}}</p>
-        <p>Apabila anda tidak merasa melakukan pengajuan berikut, mohon mengabaikan email ini</p>
+        <h1>
+            <div class="header">
+                Verifikasi gagal
+            </div>
+        </h1>
+        <p >
+            Silahkan melakukan pengajuan ulang penggantian password.
+        </p>
     </div>
 </body>
 </html>
