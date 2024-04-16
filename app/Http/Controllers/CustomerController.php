@@ -8,6 +8,11 @@ use App\Models\User;
 use App\Models\Pesanan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MailSend;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CustomerController extends Controller
 {
@@ -171,6 +176,93 @@ class CustomerController extends Controller
             ], 400);
         }
     }
+  
+    public function createToken(string $id){
+        $user = User::find($id);
+        if($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+        try{
+            $newToken=Str::random(100);
+            $exist=DB::table('password_reset_tokens')->where('email',$user->email)->first();
+            if($exist){
+                DB::table('password_reset_tokens')->where('email',$user->email)->Update([
+                    'token'=>$newToken,
+                    'created_at'=>now()
+                ]);
+            }else{
+                DB::table('password_reset_tokens')->Insert([
+                    'email'=>$user->email,
+                    'token'=>$newToken,
+                    'created_at'=>now()
+                ]);
+            }
+            $details=[
+                'name'=>$user->nama,
+                'url'=>request()->getHttpHost().'/customer/front-end-next/'.$newToken,
+                'token'=>$newToken
+            ];
+
+            Mail::to($user->email)->send(new MailSend($details));
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Reset password link has been sent to your email.'
+            ], 200);
+
+        }catch(\Exception $e){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function resetPassword(Request $request){ 
+        
+        try {
+            $validator = Validator::make($request->all(), [
+                'password' => 'required|min:8',
+                'confirm_password' => 'required|same:password',
+            ]);
+            
+            if($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors()
+                ], 400);
+            }
+
+            $email = $request->email;
+            $token = $request->token;
+            $password = $request->password;
+
+            $resetToken = DB::table('password_reset_tokens')->where('email',$email)->first();
+            if(!$resetToken || $resetToken->token != $token ){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid or expired token'
+                ], 400);
+            }
+            DB::table('users')->where('email', $email)->update([
+                'password' => Hash::make($request->password),
+            ]);
+            DB::table('password_reset_tokens')->where('email', $email)->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Password updated successfully.'
+            ], 200);
+
+        } catch(\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
 
     public function historyTransaction()
     {
@@ -180,14 +272,6 @@ class CustomerController extends Controller
                 'status' => 'error',
                 'message' => 'Unauthorized'
             ], 401);
-        }
-        $user = User::find($id);
-
-        if ($user == null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found.'
-            ], 404);
         }
         try {
             $data = Pesanan::where('id_user', $id)->get();

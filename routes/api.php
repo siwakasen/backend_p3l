@@ -200,7 +200,7 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('change-password')->group(function () {
-        Route::put('/{id}', [CustomerController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+        Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
 });
 
