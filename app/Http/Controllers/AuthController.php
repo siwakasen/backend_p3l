@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
+use App\Models\User;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
@@ -52,6 +53,7 @@ class AuthController extends Controller
             ]);
         } else if (Auth::guard('user')->attempt($credentials)) {
             $user = auth()->guard('user')->user();
+            $token = User::where('id_user', $user->id_user)->first();
             $payload = [
                 'id' => $user->id_user,
                 'name' => $user->nama,
@@ -60,12 +62,14 @@ class AuthController extends Controller
                 'no_hp' => $user->no_hp,
                 'saldo' => $user->saldo,
                 'poin' => $user->poin,
+                'email_verified_at' => $user->email_verified_at,
             ];
 
             return response()->json([
                 'status' => true,
                 'message' => 'Login success',
                 'data' => $payload,
+                'token' => $token->createToken('authToken', ['user'])->plainTextToken
             ]);
         }
 

@@ -24,6 +24,8 @@ use App\Http\Controllers\PengeluaranLainController;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [CustomerController::class, 'register']);
+    Route::get('/verify/{token}', [CustomerController::class, 'verify']);
+    Route::post('/kirim-ulang-email', [CustomerController::class, 'resendEmail']);
 });
 
 /*
@@ -198,7 +200,7 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('change-password')->group(function () {
-        Route::put('/{id}', [CustomerController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+        Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
 });
 
@@ -214,8 +216,8 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('profile')->group(function () {
-        Route::get('/{id}', [CustomerController::class, 'showData']);
-        Route::put('/{id}', [CustomerController::class, 'changeProfile']);
+        Route::get('/', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
+        Route::put('/', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
     });
     
     /*
@@ -224,7 +226,7 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('history')->group(function () {
-        Route::get('/{id}', [CustomerController::class, 'historyTransaction']);
-        Route::post('/{id}', [CustomerController::class, 'searchTransaction']);
+        Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/', [CustomerController::class, 'searchTransaction'])->middleware('auth:sanctum', 'ability:user');
     });
 });
