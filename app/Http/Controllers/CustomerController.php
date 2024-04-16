@@ -267,7 +267,7 @@ class CustomerController extends Controller
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Invalid token'
-                ], 400);
+                ], 404);
             }else if(!$token->is_active){
                 return response()->json([
                     'status' => 'error',
