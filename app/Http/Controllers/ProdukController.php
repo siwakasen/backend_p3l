@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DetailHampers;
 use App\Models\Produk;
+use App\Models\Resep;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -94,7 +96,7 @@ class ProdukController extends Controller
             'id_penitip' => 'numeric',
             'id_kategori' => 'required|numeric',
             'nama_produk' => 'required|string|unique:produk',
-            'id_resep' => 'required|numeric',
+            'id_resep' => 'numeric',
             'foto_produk' => 'required|mimes:jpg,png,jpeg|max:2048',
             'deskripsi_produk' => 'required|string',
             'harga_produk' => 'required|numeric',
@@ -191,6 +193,7 @@ class ProdukController extends Controller
         }
 
         Storage::disk('public')->delete($produk->foto_produk);
+        DetailHampers::where('id_produk', $id)->delete();
         $produk->delete();
         return response()->json([
             'status' => true,
