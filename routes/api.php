@@ -26,6 +26,8 @@ use App\Http\Middleware\TokenValidation;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [CustomerController::class, 'register']);
+    Route::get('/verify/{token}', [CustomerController::class, 'verify']);
+    Route::post('/kirim-ulang-email', [CustomerController::class, 'resendEmail']);
 });
 
 /*
@@ -216,8 +218,8 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('profile')->group(function () {
-        Route::get('/{id}', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
-        Route::put('/{id}', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
+        Route::put('/', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
     });
     
     Route::prefix('reset-password')->group(function () {

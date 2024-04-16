@@ -8,8 +8,9 @@ use App\Models\User;
 use App\Models\Pesanan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\MailVerification;
+use Illuminate\Support\Str;
 use App\Mail\MailSend;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -56,14 +57,24 @@ class CustomerController extends Controller
                 ], 400);
             }
 
-            User::create([
+            $user = User::create([
                 'nama' => $request->nama,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'tanggal_lahir' => $request->tanggal_lahir,
-                'no_hp' => $request->no_hp,
-                'email_verified_at' => now(),
+                'no_hp' => $request->no_hp
             ]);
+            
+            $data = [
+                'id_user' => $user->id_user,
+                'nama' => $user->nama,
+                'email' => $user->email,
+                'tanggal_lahir' => $user->tanggal_lahir,
+                'no_hp' => $user->no_hp,
+                'token' => $user->id_user.md5($user->email.$user->nama)
+            ];
+
+            Mail::to($request->email)->send(new MailVerification($data));
 
             return response()->json([
                 'status' => 'success',
@@ -77,18 +88,70 @@ class CustomerController extends Controller
         }
     }
 
-    public function showData()
-    {
-        $id = Auth::user()->id_user;
-        if ($id == null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-        $user = User::find($id);
+    public function verify($token) {
+        $user = User::where('id_user', substr($token, 0, -32))->first();
 
         if ($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        if($token == $user->id_user.md5($user->email.$user->nama)) {
+            $user->update([
+                'email_verified_at' => date('Y-m-d H:i:s')
+            ]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Email verified successfully.'
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Invalid token.'
+        ], 400);
+    }
+
+    public function resendEmail(Request $request) {
+        $user = User::where('email', $request->email)->first();
+
+        if($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        if($user->email_verified_at != null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Email already verified.'
+            ], 400);
+        }
+
+        $data = [
+            'id_user' => $user->id_user,
+            'nama' => $user->nama,
+            'email' => $user->email,
+            'tanggal_lahir' => $user->tanggal_lahir,
+            'no_hp' => $user->no_hp,
+            'token' => $user->id_user.md5($user->email.$user->nama)
+        ];
+
+        Mail::to($request->email)->send(new MailVerification($data));
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Email verification sent successfully.'
+        ], 200);
+    }
+
+    public function showData() {
+        $user = User::find(Auth::user()->id_user);
+        if($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User not found.'
@@ -263,16 +326,17 @@ class CustomerController extends Controller
         }
     }
 
-    public function historyTransaction()
-    {
-        $id = Auth::user()->id_user;
-        if ($id == null) {
+    public function historyTransaction() {
+        $user = User::find(Auth::user()->id_user);
+
+        if($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized'
             ], 401);
         }
         try {
+            $id = Auth::user()->id_user;
             $data = Pesanan::where('id_user', $id)->get();
 
             return response()->json([
