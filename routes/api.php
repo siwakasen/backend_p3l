@@ -216,8 +216,13 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('profile')->group(function () {
-        Route::get('/', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
-        Route::put('/', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/{id}', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
+        Route::put('/{id}', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
+    });
+    
+    Route::prefix('reset-password')->group(function () {
+        Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware('auth:sanctum', 'ability:user');
     });
 
     /*
