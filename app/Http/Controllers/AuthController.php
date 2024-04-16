@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
 use App\Models\User;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,12 +63,13 @@ class AuthController extends Controller
                 'poin' => $user->poin,
                 'email_verified_at' => $user->email_verified_at,
             ];
-
+            $token = User::where('id_user', $user->id_user)->first();
+            $token = $token->createToken('authToken', ["user"])->plainTextToken;
             return response()->json([
                 'status' => true,
                 'message' => 'Login success',
                 'data' => $payload,
-                'token' => $token->createToken('authToken', ['user'])->plainTextToken
+                'token' => $token
             ]);
         }
 
@@ -85,10 +85,11 @@ class AuthController extends Controller
     |             Administrator Access         |
     ============================================
     */
-    public function changePassword(Request $request, string $id) {
+    public function changePassword(Request $request, string $id)
+    {
         $karyawan = Karyawan::find($id);
 
-        if($karyawan == null) {
+        if ($karyawan == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Karyawan not found.'
@@ -102,14 +103,14 @@ class AuthController extends Controller
                 'confirm_password' => 'required|same:new_password',
             ]);
 
-            if($validator->fails()) {
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => $validator->errors()
                 ], 400);
             }
 
-            if(!password_verify($request->password, $karyawan->password)) {
+            if (!password_verify($request->password, $karyawan->password)) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Invalid password.'
@@ -124,7 +125,7 @@ class AuthController extends Controller
                 'status' => 'success',
                 'message' => 'Password updated successfully.'
             ], 200);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage()

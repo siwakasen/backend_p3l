@@ -15,12 +15,14 @@ use App\Http\Controllers\PembelianBahanBakuController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
+use App\Http\Middleware\TokenValidation;
 
 /*
 =======================================================
 |                   Public View                       |
 =======================================================
 */
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [CustomerController::class, 'register']);
@@ -127,7 +129,7 @@ Route::prefix('administrator')->group(function () {
         Route::post('/', [LimitProdukController::class, 'insertLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
     });
-    
+
     /*
     =======================================================
     |           Management Pembelian Bahan Baku           |
@@ -147,7 +149,7 @@ Route::prefix('administrator')->group(function () {
     |                   Bahan Baku Management             |
     =======================================================
     */
-    Route::prefix('bahan-baku')->group(function (){
+    Route::prefix('bahan-baku')->group(function () {
         Route::get('/', [BahanBakuController::class, 'getAllBahanBaku']);
         Route::get('/search', [BahanBakuController::class, 'searchBahanBaku']);
         Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku']);
@@ -161,7 +163,7 @@ Route::prefix('administrator')->group(function () {
     |                 Penitip Management                  |
     =======================================================
     */
-    Route::prefix('penitip')->group(function (){
+    Route::prefix('penitip')->group(function () {
         Route::get('/', [PenitipController::class, 'getAllPenitip']);
         Route::get('/search', [PenitipController::class, 'searchPenitip']);
         Route::get('/{id}', [PenitipController::class, 'getPenitip']);
@@ -175,7 +177,7 @@ Route::prefix('administrator')->group(function () {
     |                Pengeluaran Lain Management          |
     =======================================================
     */
-    Route::prefix('pengeluaran-lain')->group(function (){
+    Route::prefix('pengeluaran-lain')->group(function () {
         Route::get('/', [PengeluaranLainController::class, 'getAllPengeluaranLain']);
         Route::get('/search', [PengeluaranLainController::class, 'searchPengeluaranLain']);
         Route::get('/{id}', [PengeluaranLainController::class, 'getPengeluaranLain']);
@@ -189,7 +191,7 @@ Route::prefix('administrator')->group(function () {
     |                Detail Hampers Management            |
     =======================================================
     */
-    Route::prefix('data-customer')->group(function (){
+    Route::prefix('data-customer')->group(function () {
         Route::get('/searchData', [CustomerController::class, 'searchDataCustomer'])->middleware('auth:sanctum', 'ability:admin');
         Route::get('/getDataHistory/{id}', [CustomerController::class, 'getHistoryPesananCustomer'])->middleware('auth:sanctum', 'ability:admin');
     });
@@ -220,6 +222,11 @@ Route::prefix('customer')->group(function () {
         Route::put('/', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
     });
     
+    Route::prefix('reset-password')->group(function () {
+        Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware('auth:sanctum', 'ability:user');
+    });
+
     /*
     =======================================================
     |                       History                       |
