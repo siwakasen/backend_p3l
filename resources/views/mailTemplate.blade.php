@@ -47,7 +47,7 @@
         <p>Anda telah mengajukan perubahan password pada akun Anda</p>
         <p>Untuk memverifikasi tindakan anda, silahkan mengakses link berikut agar dapat melakukan reset password</p>
         <p>{{$details['url']}}</p>
-        <p>Apabila anda tidak merasa melakukan pengajuan berikut, mohon mengabaikan email ini</p>
+        <p><b>Apabila anda tidak merasa melakukan pengajuan berikut, mohon mengabaikan email ini</b></p>
     </div>
 </body>
 </html>
