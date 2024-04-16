@@ -61,7 +61,6 @@ class AuthController extends Controller
                 'saldo' => $user->saldo,
                 'poin' => $user->poin,
             ];
-
             return response()->json([
                 'status' => true,
                 'message' => 'Login success',

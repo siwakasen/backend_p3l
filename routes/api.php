@@ -198,7 +198,7 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('change-password')->group(function () {
-        Route::put('/{id}', [CustomerController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+        Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
 });
 
@@ -216,6 +216,11 @@ Route::prefix('customer')->group(function () {
     Route::prefix('profile')->group(function () {
         Route::get('/{id}', [CustomerController::class, 'showData']);
         Route::put('/{id}', [CustomerController::class, 'changeProfile']);
+    });
+    
+    Route::prefix('reset-password')->group(function () {
+        Route::post('/create-token/{id}', [CustomerController::class, 'createToken']);
+        Route::post('/reset', [CustomerController::class, 'resetPassword']);
     });
     
     /*
