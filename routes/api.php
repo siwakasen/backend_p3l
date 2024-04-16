@@ -216,21 +216,22 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('profile')->group(function () {
-        Route::get('/{id}', [CustomerController::class, 'showData'])->middleware(TokenValidation::class);
-        Route::put('/{id}', [CustomerController::class, 'changeProfile'])->middleware(TokenValidation::class);
+        Route::get('/{id}', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
+        Route::put('/{id}', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
     });
     
     Route::prefix('reset-password')->group(function () {
-        Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware(TokenValidation::class);
-        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware(TokenValidation::class);
+        Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware('auth:sanctum', 'ability:user');
     });
+
     /*
     =======================================================
     |                       History                       |
     =======================================================
     */
     Route::prefix('history')->group(function () {
-        Route::get('/{id}', [CustomerController::class, 'historyTransaction'])->middleware(TokenValidation::class);
-        Route::post('/{id}', [CustomerController::class, 'searchTransaction'])->middleware(TokenValidation::class);
+        Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/', [CustomerController::class, 'searchTransaction'])->middleware('auth:sanctum', 'ability:user');
     });
 });
