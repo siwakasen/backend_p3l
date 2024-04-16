@@ -197,8 +197,8 @@ class CustomerController extends Controller
         }
     }
 
-    public function resetPassword(Request $request){ 
-        
+    public function resetPassword(Request $request, string $id){ 
+        $user=User::find($id);
         try {
             $validator = Validator::make($request->all(), [
                 'password' => 'required|min:8',
@@ -211,8 +211,7 @@ class CustomerController extends Controller
                     'message' => $validator->errors()
                 ], 400);
             }
-
-            $email = $request->email;
+            $email = $user->email;
             $token = $request->token;
             $password = $request->password;
 

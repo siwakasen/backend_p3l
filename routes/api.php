@@ -222,7 +222,7 @@ Route::prefix('customer')->group(function () {
     
     Route::prefix('reset-password')->group(function () {
         Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware(TokenValidation::class);
-        Route::post('/reset', [CustomerController::class, 'resetPassword'])->middleware(TokenValidation::class);
+        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware(TokenValidation::class);
     });
     /*
     =======================================================
