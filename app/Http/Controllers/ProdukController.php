@@ -31,9 +31,10 @@ class ProdukController extends Controller
         'stok_produk.required' => 'Stok produk harus diisi',
         'stok_produk.numeric' => 'Stok produk harus berupa angka',
         'id_penitip.numeric' => 'Id penitip harus berupa angka',
+        'status_produk.boolean' => 'Status produk harus berupa boolean'
     ];
 
-    public function getProduk(Request $request, $id)
+    public function getProduk($id)
     {
         $produk = Produk::find($id);
         if (!$produk) {
@@ -51,7 +52,7 @@ class ProdukController extends Controller
         ]);
     }
 
-    public function getAllProduk(Request $request)
+    public function getAllProduk()
     {
         $produk = Produk::all();
 
@@ -144,6 +145,7 @@ class ProdukController extends Controller
             'deskripsi_produk' => 'string',
             'harga_produk' => 'numeric',
             'stok_produk' => 'numeric',
+            'status_produk' => 'boolean'
         ], $this->validator_exceptions);
 
         if ($validate->fails()) {

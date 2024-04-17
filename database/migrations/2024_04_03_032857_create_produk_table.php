@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('deskripsi_produk');
             $table->double('harga_produk');
             $table->integer('stok_produk')->default(0);
+            $table->boolean('status_produk')->default(true);
             $table->timestamps();
         });
     }

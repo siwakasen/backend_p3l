@@ -62,6 +62,7 @@ class AuthController extends Controller
                 'saldo' => $user->saldo,
                 'poin' => $user->poin,
                 'email_verified_at' => $user->email_verified_at,
+                'role' => 'User'
             ];
             $token = User::where('id_user', $user->id_user)->first();
             $token = $token->createToken('authToken', ["user"])->plainTextToken;
