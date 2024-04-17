@@ -223,8 +223,9 @@ Route::prefix('customer')->group(function () {
     });
     
     Route::prefix('reset-password')->group(function () {
-        Route::post('/create-token/{id}', [CustomerController::class, 'createToken'])->middleware('auth:sanctum', 'ability:user');
-        Route::post('/reset/{id}', [CustomerController::class, 'resetPassword'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/create-token', [CustomerController::class, 'createToken']);
+        Route::get('/activate/{token}', [CustomerController::class, 'activateToken']);
+        Route::post('/submit-reset', [CustomerController::class, 'resetPassword']);
     });
 
     /*

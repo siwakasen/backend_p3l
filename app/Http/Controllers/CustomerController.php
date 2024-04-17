@@ -240,8 +240,17 @@ class CustomerController extends Controller
         }
     }
   
-    public function createToken(string $id){
-        $user = User::find($id);
+    public function createToken(Request $request){
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
+        if($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()
+            ], 400);
+        }
+        $user = User::where('email', $request->email)->first();
         if($user == null) {
             return response()->json([
                 'status' => 'error',
@@ -251,6 +260,7 @@ class CustomerController extends Controller
         try{
             $newToken=Str::random(100);
             $exist=DB::table('password_reset_tokens')->where('email',$user->email)->first();
+
             if($exist){
                 DB::table('password_reset_tokens')->where('email',$user->email)->Update([
                     'token'=>$newToken,
@@ -265,15 +275,14 @@ class CustomerController extends Controller
             }
             $details=[
                 'name'=>$user->nama,
-                'url'=>request()->getHttpHost().'/customer/front-end-next/'.$newToken,
-                'token'=>$newToken
+                'url'=>request()->getHttpHost().'/api/customer/reset-password/activate/'.$newToken,
             ];
 
             Mail::to($user->email)->send(new MailSend($details));
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Reset password link has been sent to your email.'
+                'message' => 'Request to reset password has been sent to your email.'
             ], 200);
 
         }catch(\Exception $e){
@@ -284,8 +293,19 @@ class CustomerController extends Controller
         }
     }
 
-    public function resetPassword(Request $request, string $id){ 
-        $user=User::find($id);
+    public function activateToken(String $token){
+        $verify_token = DB::table('password_reset_tokens')->where('token',$token)->first();
+        if(!$verify_token || $verify_token->token != $token ){
+            return view('verificationFailed');
+        }
+        DB::table('password_reset_tokens')->where('token',$token)->update([
+            'is_active'=>true
+        ]);
+        $link = 'http://127.0.0.1:3000/link-to-front-end-next';
+        return view('verificationSuccess', compact('link'));
+    }
+
+    public function resetPassword(Request $request){ 
         try {
             $validator = Validator::make($request->all(), [
                 'password' => 'required|min:8',
@@ -298,21 +318,31 @@ class CustomerController extends Controller
                     'message' => $validator->errors()
                 ], 400);
             }
-            $email = $user->email;
-            $token = $request->token;
-            $password = $request->password;
-
-            $resetToken = DB::table('password_reset_tokens')->where('email',$email)->first();
-            if(!$resetToken || $resetToken->token != $token ){
+            $user = User::where('email', $request->email)->first();
+            if($user == null) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Invalid or expired token'
+                    'message' => 'User not found.'
+                ], 404);
+            }
+            $token = DB::table('password_reset_tokens')->where('email',$user->email)->first();
+            if(!$token){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid token'
+                ], 404);
+            }else if(!$token->is_active){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Token is not active'
                 ], 400);
             }
-            DB::table('users')->where('email', $email)->update([
-                'password' => Hash::make($request->password),
+
+            $user->update([
+                'password' => Hash::make($request->password)
             ]);
-            DB::table('password_reset_tokens')->where('email', $email)->delete();
+
+            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
             return response()->json([
                 'status' => 'success',
                 'message' => 'Password updated successfully.'
