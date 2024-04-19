@@ -275,14 +275,14 @@ class CustomerController extends Controller
             }
             $details=[
                 'name'=>$user->nama,
-                'url'=>request()->getHttpHost().'/api/customer/reset-password/activate/'.$newToken,
+                'url'=>request()->ip().':'.request()->getPort().'/api/customer/reset-password/activate/'.$newToken,
             ];
 
             Mail::to($user->email)->send(new MailSend($details));
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Request to reset password has been sent to your email.'
+                'message' => 'Verification to reset password has been sent to your email.'
             ], 200);
 
         }catch(\Exception $e){
