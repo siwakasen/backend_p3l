@@ -275,7 +275,7 @@ class CustomerController extends Controller
             }
             $details=[
                 'name'=>$user->nama,
-                'url'=>request()->ip().':'.request()->getPort().'/api/customer/reset-password/activate/'.$newToken,
+                'url'=>request()->getHttpHost.'/api/customer/reset-password/activate/'.$newToken,
             ];
 
             Mail::to($user->email)->send(new MailSend($details));
