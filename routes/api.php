@@ -13,6 +13,7 @@ use App\Http\Controllers\HampersController;
 use App\Http\Controllers\LimitProdukController;
 use App\Http\Controllers\PembelianBahanBakuController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Middleware\TokenValidation;
@@ -36,6 +37,12 @@ Route::prefix('auth')->group(function () {
 =======================================================
 */
 Route::prefix('administrator')->group(function () {
+    /*
+    =======================================================
+    |                    Dashboard Data                   |
+    =======================================================
+    */
+    Route::get('/', [DashboardController::class, 'index'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     /*
     =======================================================
     |                   Roles Management                  |
