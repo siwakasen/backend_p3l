@@ -29,6 +29,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [CustomerController::class, 'register']);
     Route::get('/verify/{token}', [CustomerController::class, 'verify']);
     Route::post('/kirim-ulang-email', [CustomerController::class, 'resendEmail']);
+    Route::get('/token', [AuthController::class, 'checkToken'])->middleware('auth:sanctum');
 });
 
 /*
@@ -62,8 +63,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('karyawan')->group(function () {
-        Route::get('/', [KaryawanController::class, 'getAllKaryawan']);
-        Route::get('/{id}', [KaryawanController::class, 'getKaryawan']);
+        Route::get('/', [KaryawanController::class, 'getAllKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::get('/{id}', [KaryawanController::class, 'getKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
         Route::post('/', [KaryawanController::class, 'insertKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
         Route::put('/{id}', [KaryawanController::class, 'updateKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
         Route::delete('/{id}', [KaryawanController::class, 'deleteKaryawan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
@@ -75,8 +76,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('resep')->group(function () {
-        Route::get('/', [ResepController::class, 'getAllResep']);
-        Route::get('/{id}', [ResepController::class, 'getResep']);
+        Route::get('/', [ResepController::class, 'getAllResep'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/{id}', [ResepController::class, 'getResep'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [ResepController::class, 'insertResep'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [ResepController::class, 'updateResep'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [ResepController::class, 'deleteResep'])->middleware('auth:sanctum', 'ability:admin');
@@ -88,8 +89,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('presensi')->group(function () {
-        Route::get('/', [PresensiController::class, 'getAllPresensi']);
-        Route::get('/{tanggal}', [PresensiController::class, 'getPresensi']);
+        Route::get('/', [PresensiController::class, 'getAllPresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/{tanggal}', [PresensiController::class, 'getPresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::post('/', [PresensiController::class, 'createPresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PresensiController::class, 'updatePresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PresensiController::class, 'deletePresensi'])->middleware('auth:sanctum', 'ability:manajer-operasional');
@@ -104,9 +105,9 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [ProdukController::class, 'updateProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [ProdukController::class, 'insertProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [ProdukController::class, 'deleteProduk'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/search', [ProdukController::class, 'searchProduk']);
-        Route::get('/{id}', [ProdukController::class, 'getProduk']);
-        Route::get('/', [ProdukController::class, 'getAllProduk']);
+        Route::get('/search', [ProdukController::class, 'searchProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/{id}', [ProdukController::class, 'getProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/', [ProdukController::class, 'getAllProduk'])->middleware('auth:sanctum', 'ability:admin');
     });
 
 
@@ -116,9 +117,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('hampers')->group(function () {
-        Route::get('/search', [HampersController::class, 'searchHampers']);
-        Route::get('/', [HampersController::class, 'getAllHampers']);
-        Route::get('/{id}', [HampersController::class, 'getHampers']);
+        Route::get('/search', [HampersController::class, 'searchHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/', [HampersController::class, 'getAllHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/{id}', [HampersController::class, 'getHampers'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [HampersController::class, 'updateHampers'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [HampersController::class, 'insertHampers'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [HampersController::class, 'deleteHampers'])->middleware('auth:sanctum', 'ability:admin');
@@ -130,8 +131,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('limit-produk')->group(function () {
-        Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk']);
-        Route::get('/', [LimitProdukController::class, 'getAllLimitProduct']);
+        Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/', [LimitProdukController::class, 'getAllLimitProduct'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [LimitProdukController::class, 'udpateLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [LimitProdukController::class, 'insertLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
@@ -143,9 +144,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('pembelian-bahan-baku')->group(function () {
-        Route::get('/search', [PembelianBahanBakuController::class, 'searchPembelianBahanBaku']);
-        Route::get('/', [PembelianBahanBakuController::class, 'getAllPembelianBahanBaku']);
-        Route::get('/{id}', [PembelianBahanBakuController::class, 'getPembelianBahanBaku']);
+        Route::get('/search', [PembelianBahanBakuController::class, 'searchPembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/', [PembelianBahanBakuController::class, 'getAllPembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/{id}', [PembelianBahanBakuController::class, 'getPembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::post('/', [PembelianBahanBakuController::class, 'insertPembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PembelianBahanBakuController::class, 'deletePembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PembelianBahanBakuController::class, 'updatePembelianBahanBaku'])->middleware('auth:sanctum', 'ability:manajer-operasional');
@@ -157,9 +158,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('bahan-baku')->group(function () {
-        Route::get('/', [BahanBakuController::class, 'getAllBahanBaku']);
-        Route::get('/search', [BahanBakuController::class, 'searchBahanBaku']);
-        Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku']);
+        Route::get('/', [BahanBakuController::class, 'getAllBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/search', [BahanBakuController::class, 'searchBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [BahanBakuController::class, 'insertBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [BahanBakuController::class, 'deleteBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [BahanBakuController::class, 'updateBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
@@ -171,9 +172,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('penitip')->group(function () {
-        Route::get('/', [PenitipController::class, 'getAllPenitip']);
-        Route::get('/search', [PenitipController::class, 'searchPenitip']);
-        Route::get('/{id}', [PenitipController::class, 'getPenitip']);
+        Route::get('/', [PenitipController::class, 'getAllPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/search', [PenitipController::class, 'searchPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/{id}', [PenitipController::class, 'getPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::post('/', [PenitipController::class, 'insertPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PenitipController::class, 'updatePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PenitipController::class, 'deletePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
@@ -185,9 +186,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('pengeluaran-lain')->group(function () {
-        Route::get('/', [PengeluaranLainController::class, 'getAllPengeluaranLain']);
-        Route::get('/search', [PengeluaranLainController::class, 'searchPengeluaranLain']);
-        Route::get('/{id}', [PengeluaranLainController::class, 'getPengeluaranLain']);
+        Route::get('/', [PengeluaranLainController::class, 'getAllPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/search', [PengeluaranLainController::class, 'searchPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/{id}', [PengeluaranLainController::class, 'getPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::post('/', [PengeluaranLainController::class, 'insertPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PengeluaranLainController::class, 'updatePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PengeluaranLainController::class, 'deletePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
@@ -228,7 +229,7 @@ Route::prefix('customer')->group(function () {
         Route::get('/', [CustomerController::class, 'showData'])->middleware('auth:sanctum', 'ability:user');
         Route::put('/', [CustomerController::class, 'changeProfile'])->middleware('auth:sanctum', 'ability:user');
     });
-    
+
     Route::prefix('reset-password')->group(function () {
         Route::post('/create-token', [CustomerController::class, 'createToken']);
         Route::get('/activate/{token}', [CustomerController::class, 'activateToken']);

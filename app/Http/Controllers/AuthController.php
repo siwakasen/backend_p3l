@@ -81,6 +81,42 @@ class AuthController extends Controller
         ], 401);
     }
 
+
+    public function checkToken()
+    {
+        $user = auth()->user();
+
+        if (is_null($user['id_karyawan'])) {
+            $payload = [
+                'id' => $user->id_user,
+                'name' => $user->nama,
+                'email' => $user->email,
+                'tanggal_lahir' => $user->tanggal_lahir,
+                'no_hp' => $user->no_hp,
+                'saldo' => $user->saldo,
+                'poin' => $user->poin,
+                'email_verified_at' => $user->email_verified_at,
+                'role' => 'User'
+            ];
+        } else {
+            $payload = [
+                'id_karyawan' => $user->id_karyawan,
+                'id_role' => $user->id_role,
+                'nama_karyawan' => $user->nama_karyawan,
+                'email' => $user->email,
+                'tanggal_masuk' => $user->tanggal_masuk,
+                'bonus_gaji' => $user->bonus_gaji,
+                'role' => $user->Role->nama_role,
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Token valid',
+            'data' => $payload,
+        ]);
+    }
+
     /*
     ============================================
     |             Administrator Access         |
