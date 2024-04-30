@@ -254,7 +254,7 @@ class CustomerController extends Controller
         if($user == null) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'User not found.'
+                'message' => 'Email not registered.'
             ], 404);
         }
         try{
@@ -301,8 +301,28 @@ class CustomerController extends Controller
         DB::table('password_reset_tokens')->where('token',$token)->update([
             'is_active'=>true
         ]);
-        $link = 'http://127.0.0.1:3000/link-to-front-end-next';
+        $link = 'http://127.0.0.1:3000/auth/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
         return view('verificationSuccess', compact('link'));
+    }
+    
+    public function validateToken(String $token){
+        $verify_token = DB::table('password_reset_tokens')->where('token',$token)->first();
+        if(!$verify_token || $verify_token->token != $token ){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Invalid token'
+            ], 404);
+        }
+        if(!$verify_token->is_active){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Token is not active'
+            ], 400);
+        }
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Token is valid'
+        ], 200);
     }
 
     public function resetPassword(Request $request){ 
@@ -322,7 +342,7 @@ class CustomerController extends Controller
             if($user == null) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'User not found.'
+                    'message' => 'Email not registered.'
                 ], 404);
             }
             $token = DB::table('password_reset_tokens')->where('email',$user->email)->first();
