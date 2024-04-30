@@ -226,6 +226,7 @@ Route::prefix('customer')->group(function () {
     Route::prefix('reset-password')->group(function () {
         Route::post('/create-token', [CustomerController::class, 'createToken']);
         Route::get('/activate/{token}', [CustomerController::class, 'activateToken']);
+        Route::get('/validate/{token}', [CustomerController::class, 'validateToken']);
         Route::post('/submit-reset', [CustomerController::class, 'resetPassword']);
     });
 
