@@ -34,7 +34,6 @@
         background-color: #f5f5f5;
     }
     .body__content {
-        line-height: 1.5;
         padding: 20px;
         margin: 0 auto; /* Add margin for centering */
         width: 50%;
@@ -56,40 +55,33 @@
     .footer__text {
         color: #999;
     }
+
+    @media only screen and (max-width: 600px) {
+        .body__content, .body__action {
+            width: 90%;
+        }
+    }
   </style>
 </head>
 <body>
   <table width="100%">
     <tr>
-      <th class="header">
-        <div class="header__logo">
-          <h1>Atma Kitchen</h1>
-        </div>
-      </th>
-    </tr>
-    <tr>
       <td>
         <div class="body">
           <div class="body__content">
             <p>Hi {{ $data['nama'] }},</p>
-            <p>Thank you for signing up for Atma Kitchen! To verify your email address and complete your registration, please click the button below:</p>
-          </div>
-          <div class="body__action">
-            <a href="{{ url('/api/auth/verify', $data['token']) }}" style="background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;">Verify Your Email Address</a>
-          </div>
-          <div class="body__content">
-            <p>If you can't click the button above, please copy and paste the following link into your web browser:</p>
-            <p>{{ url('/api/auth/verify', $data['token']) }}</p>
+            <p>Terima Kasih sudah melakukan pendaftaran di Atma Kitchen. Berikut adalah kode verifikasi Anda:</p>
+            <div class="body__action">
+              <div style="background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px;">
+                <h3>
+                  {{ $data['digit'] }}
+                </h3>
+              </div>
+            </div>
+            <p>Jika Anda tidak merasa melakukan pendaftaran, abaikan email ini. Dan jika kode verifikasi tidak bekerja, silahkan melakukan pengiriman ulang kode verifikasi.</p>
           </div>
         </div>
       </td>
-    </tr>
-    <tr>
-      <th class="footer">
-        <div class="footer__text">
-          <p>&copy; {{ date('Y') }} Atma Kitchen. All rights reserved.</p>
-        </div>
-      </th>
     </tr>
   </table>
 </body>

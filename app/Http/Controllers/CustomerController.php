@@ -53,6 +53,7 @@ class CustomerController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }
@@ -65,20 +66,33 @@ class CustomerController extends Controller
                 'no_hp' => $request->no_hp
             ]);
             
+            $id_token = $user->id_user;
+
+            if($user->id_user < 10){
+                $id_token = '0'.$user->id_user;
+            }else{
+                $id_token = substr($user->id_user, 0, 2);
+            }
+
+            $digitSec = substr($user->no_hp, -4).$id_token;
+            $token = $user->id_user.md5($user->email.$user->nama);
+            
             $data = [
                 'id_user' => $user->id_user,
                 'nama' => $user->nama,
                 'email' => $user->email,
                 'tanggal_lahir' => $user->tanggal_lahir,
                 'no_hp' => $user->no_hp,
-                'token' => $user->id_user.md5($user->email.$user->nama)
+                'token' => $token,
+                'digit' => $digitSec
             ];
 
             Mail::to($request->email)->send(new MailVerification($data));
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'User registered successfully.'
+                'message' => 'User registered successfully.',
+                'token' => $token
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -88,7 +102,47 @@ class CustomerController extends Controller
         }
     }
 
-    public function verify($token) {
+    public function emailCheck(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+        if ($user == null) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Email available.'
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email already registered.'
+            ]);
+        }
+    }
+
+    public function checkTokenValidity($token)
+    {
+        $user = User::where('id_user', substr($token, 0, -32))->first();
+        if ($user == null) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
+
+        if ($token == $user->id_user . md5($user->email . $user->nama) && $user->email_verified_at == null) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Token valid.',
+                'email' => $user->email
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid token.'
+        ], 400);
+    }
+
+    public function verify(Request $request, $token) {
         $user = User::where('id_user', substr($token, 0, -32))->first();
 
         if ($user == null) {
@@ -98,25 +152,36 @@ class CustomerController extends Controller
             ], 404);
         }
 
-        if($token == $user->id_user.md5($user->email.$user->nama)) {
+        $id_token = $user->id_user;
+
+        if($user->id_user < 10){
+            $id_token = '0'.$user->id_user;
+        }else{
+            $id_token = substr($user->id_user, 0, 2);
+        }
+
+        if($token == $user->id_user.md5($user->email.$user->nama) && $request->digit == substr($user->no_hp, -4).$id_token && $user->email_verified_at == null) {
             $user->update([
                 'email_verified_at' => date('Y-m-d H:i:s')
             ]);
 
+            $userToken = $user->createToken('authToken', ["user"])->plainTextToken;
+
             return response()->json([
                 'status' => 'success',
-                'message' => 'Email verified successfully.'
+                'message' => 'Berhasil melakukan verifikasi email.',
+                'token' => $userToken
             ], 200);
         }
 
         return response()->json([
             'status' => 'error',
-            'message' => 'Invalid token.'
+            'message' => 'Token atau digit tidak valid.'
         ], 400);
     }
 
     public function resendEmail(Request $request) {
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('id_user', substr($request->token, 0, -32))->first();
 
         if($user == null) {
             return response()->json([
@@ -132,25 +197,47 @@ class CustomerController extends Controller
             ], 400);
         }
 
+        $id_token = $user->id_user;
+
+        if($user->id_user < 10){
+            $id_token = '0'.$user->id_user;
+        }else{
+            $id_token = substr($user->id_user, 0, 2);
+        }
+
         $data = [
             'id_user' => $user->id_user,
             'nama' => $user->nama,
             'email' => $user->email,
             'tanggal_lahir' => $user->tanggal_lahir,
             'no_hp' => $user->no_hp,
-            'token' => $user->id_user.md5($user->email.$user->nama)
+            'token' => $user->id_user.md5($user->email.$user->nama),
+            'digit' => substr($user->no_hp, -4).$id_token
         ];
 
-        Mail::to($request->email)->send(new MailVerification($data));
+        Mail::to($user->email)->send(new MailVerification($data));
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Email verification sent successfully.'
+            'message' => 'Berhasil mengirim ulang email verifikasi.'
         ], 200);
     }
 
     public function showData() {
         $user = User::find(Auth::user()->id_user);
+
+        $user = [
+            'id' => $user->id_user,
+            'nama' => $user->nama,
+            'email' => $user->email,
+            'tanggal_lahir' => $user->tanggal_lahir,
+            'no_hp' => $user->no_hp,
+            'saldo' => $user->saldo,
+            'poin' => $user->poin,
+            'email_verified_at' => $user->email_verified_at,
+            'role' => 'User'
+        ];
+
         if($user == null) {
             return response()->json([
                 'status' => 'error',
@@ -178,20 +265,16 @@ class CustomerController extends Controller
             $validator = Validator::make(
                 $request->all(),
                 [
-                    'nama' => 'required|max:255',
-                    'email' => 'required|email|unique:users,email,' . $id . ',id_user',
-                    'tanggal_lahir' => 'required|date',
-                    'no_hp' => 'required|numeric'
+                    'nama' => 'max:255',
+                    'email' => 'email|unique:users,email,' . $id . ',id_user',
+                    'tanggal_lahir' => 'date',
+                    'no_hp' => 'numeric'
                 ],
                 [
-                    'nama.required' => 'Nama harus diisi!',
                     'nama.max' => 'Nama maksimal 255 karakter!',
-                    'email.required' => 'Email harus diisi!',
                     'email.email' => 'Email tidak valid!',
                     'email.unique' => 'Email sudah terdaftar!',
-                    'tanggal_lahir.required' => 'Tanggal lahir harus diisi!',
                     'tanggal_lahir.date' => 'Tanggal lahir tidak valid!',
-                    'no_hp.required' => 'Nomor HP harus diisi!',
                     'no_hp.numeric' => 'Nomor HP harus berupa angka!'
                 ]
             );
@@ -218,20 +301,25 @@ class CustomerController extends Controller
                         'status' => 'error',
                         'message' => 'Email already registered.'
                     ], 400);
+                }else{
+                    User::where('id_user', $id)->update(
+                        $request->only(['nama', 'email', 'tanggal_lahir', 'no_hp'])
+                    );
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'User profile updated successfully.'
+                    ], 200);
                 }
             } else {
-                User::where('id_user', $id)->update([
-                    'nama' => $request->nama,
-                    'email' => $request->email,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'no_hp' => $request->no_hp
-                ]);
+                User::where('id_user', $id)->update(
+                    $request->only(['nama', 'email', 'tanggal_lahir', 'no_hp'])
+                );
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'User profile updated successfully.'
+                ], 200);
             }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'User profile updated successfully.'
-            ], 200);
+            
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

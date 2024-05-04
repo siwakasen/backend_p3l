@@ -52,6 +52,16 @@ class AuthController extends Controller
             ]);
         } else if (Auth::guard('user')->attempt($credentials)) {
             $user = auth()->guard('user')->user();
+            if ($user->email_verified_at == null) {
+                return response()->json([
+                    'status' => false,
+                    'key' => 'email_not_verified',
+                    'message' => 'Email not verified',
+                    'data' => null,
+                    'token' => $user->id_user.md5($user->email.$user->nama),
+                ], 401);
+            }
+
             $token = User::where('id_user', $user->id_user)->first();
             $payload = [
                 'id' => $user->id_user,
@@ -66,6 +76,7 @@ class AuthController extends Controller
             ];
             $token = User::where('id_user', $user->id_user)->first();
             $token = $token->createToken('authToken', ["user"])->plainTextToken;
+
             return response()->json([
                 'status' => true,
                 'message' => 'Login success',
@@ -89,7 +100,7 @@ class AuthController extends Controller
         if (is_null($user['id_karyawan'])) {
             $payload = [
                 'id' => $user->id_user,
-                'name' => $user->nama,
+                'nama' => $user->nama,
                 'email' => $user->email,
                 'tanggal_lahir' => $user->tanggal_lahir,
                 'no_hp' => $user->no_hp,
@@ -135,7 +146,7 @@ class AuthController extends Controller
 
         try {
             $validator = Validator::make($request->all(), [
-                'password' => 'required|min:8',
+                'password' => 'required',
                 'new_password' => 'required|min:8',
                 'confirm_password' => 'required|same:new_password',
             ]);
@@ -155,7 +166,7 @@ class AuthController extends Controller
             }
 
             $karyawan->update([
-                'password' => bcrypt($request->new_password)
+                'password' => $request->new_password
             ]);
 
             return response()->json([
