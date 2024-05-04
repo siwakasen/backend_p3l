@@ -34,7 +34,7 @@ class PengeluaranLainController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Pengeluaran lain not found',
-                'data' => null
+                'data' => []
             ], 404);
         }
     }
@@ -54,7 +54,7 @@ class PengeluaranLainController extends Controller
             return response()->json([
                 'status'=>false,
                 'message'=>'Pengeluaran lain not found',
-                'data'=>null
+                'data'=> []
             ],404);
         }
     }
@@ -74,7 +74,7 @@ class PengeluaranLainController extends Controller
                 return response()->json([
                     'status'=>false,
                     'message'=>'Pengeluaran lain not found',
-                    'data'=>null
+                    'data'=> []
                 ],404);
             }
         }

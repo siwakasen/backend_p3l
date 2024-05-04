@@ -79,7 +79,7 @@ class BahanBakuController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Bahan Baku not found',
-                'data' => null
+                'data' => []
             ], 404);
         }
     }
@@ -102,7 +102,7 @@ class BahanBakuController extends Controller
                 'status' => true,
                 'message' => 'Success insert bahan baku',
                 'data' => $bahan_baku
-            ]);
+            ],200);
         } catch (\Throwable $th) {
             //throw $th;
             if($th->getMessage() == 'invalid-input'){
@@ -144,7 +144,7 @@ class BahanBakuController extends Controller
                 'status' => true,
                 'message' => 'Success update bahan baku',
                 'data' => $bahan_baku,
-            ]);
+            ],200);
         } catch (\Throwable $th) {
             //throw $th;
             if($th->getMessage() == 'not-found'){
@@ -183,7 +183,7 @@ class BahanBakuController extends Controller
                 'status' => true,
                 'message' => 'Success delete bahan baku',
                 'data' => $bahan_baku
-            ]);
+            ],200);
             
         } catch (\Throwable $th) {
             //throw $th;
@@ -194,11 +194,17 @@ class BahanBakuController extends Controller
                     'data' => null
                 ], 404);
             }else{
+                if(str_contains($th->getMessage(), 'foreign key constraint fails')){
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Bahan baku cannot be deleted because it is used in other tables',
+                    ], 400);
+                }
                 return response()->json([
                     'status' => false,
                     'message' => 'Failed delete bahan baku',
                     'error'=> $th->getMessage()
-                ], 404);
+                ], 400);
             }
         }
     }

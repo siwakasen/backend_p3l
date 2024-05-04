@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_resep', function (Blueprint $table) {
-            $table->foreignId('id_bahan_baku')->references('id_bahan_baku')->on('bahan_baku')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('id_bahan_baku')->references('id_bahan_baku')->on('bahan_baku')->cascadeOnUpdate();
             $table->foreignId('id_resep')->references('id_resep')->on('resep')->cascadeOnDelete()->cascadeOnUpdate();
             $table->integer('jumlah');
             $table->timestamps();
