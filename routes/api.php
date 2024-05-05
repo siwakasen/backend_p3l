@@ -13,6 +13,7 @@ use App\Http\Controllers\HampersController;
 use App\Http\Controllers\LimitProdukController;
 use App\Http\Controllers\PembelianBahanBakuController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Middleware\TokenValidation;
@@ -26,7 +27,9 @@ use App\Http\Middleware\TokenValidation;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [CustomerController::class, 'register']);
-    Route::get('/verify/{token}', [CustomerController::class, 'verify']);
+    Route::post('/email-check', [CustomerController::class, 'emailCheck']);
+    Route::get('/validate-token/{token}', [CustomerController::class, 'checkTokenValidity']);
+    Route::post('/verify/{token}', [CustomerController::class, 'verify']);
     Route::post('/kirim-ulang-email', [CustomerController::class, 'resendEmail']);
     Route::get('/token', [AuthController::class, 'checkToken'])->middleware('auth:sanctum');
 });
@@ -39,15 +42,21 @@ Route::prefix('auth')->group(function () {
 Route::prefix('administrator')->group(function () {
     /*
     =======================================================
+    |                    Dashboard Data                   |
+    =======================================================
+    */
+    Route::get('/', [DashboardController::class, 'index'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+    /*
+    =======================================================
     |                   Roles Management                  |
     =======================================================
     */
     Route::prefix('roles')->group(function () {
-        Route::get('/', [RolesController::class, 'getAllRole']);
-        Route::get('/{id}', [RolesController::class, 'getRole']);
-        Route::post('/', [RolesController::class, 'insertRole'])->middleware('auth:sanctum', 'ability:owner');
-        Route::put('/{id}', [RolesController::class, 'updateRole'])->middleware('auth:sanctum', 'ability:owner');
-        Route::delete('/{id}', [RolesController::class, 'deleteRole'])->middleware('auth:sanctum', 'ability:owner');
+        Route::get('/', [RolesController::class, 'getAllRole'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::get('/{id}', [RolesController::class, 'getRole'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::post('/', [RolesController::class, 'insertRole'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::put('/{id}', [RolesController::class, 'updateRole'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::delete('/{id}', [RolesController::class, 'deleteRole'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
     });
 
     /*
@@ -202,9 +211,7 @@ Route::prefix('administrator')->group(function () {
     |                   Personal Profile                  |
     =======================================================
     */
-    Route::prefix('change-password')->group(function () {
-        Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
-    });
+    Route::put('/change-password/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
 });
 
 /*

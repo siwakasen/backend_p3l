@@ -11,7 +11,7 @@ class RolesController extends Controller
     public $validator_exception = [
         'nama_role.required' => 'Nama role harus diisi!',
         'nama_role.max' => 'Nama role maksimal 255 karakter!',
-        'nominal_gaji.required' => 'Nominal gaji harus diisi!',
+        'nama_role.unique' => 'Nama role sudah terdaftar!',
         'nominal_gaji.numeric' => 'Nominal gaji harus berupa angka!'
     ];
 
@@ -44,13 +44,14 @@ class RolesController extends Controller
     {
         try{
             $validator = Validator::make($request->all(), [
-                'nama_role' => 'required|max:255',
-                'nominal_gaji' => 'required|numeric'
+                'nama_role' => 'required|max:255|unique:roles',
+                'nominal_gaji' => 'numeric'
             ], $this->validator_exception);
 
             if($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }
@@ -81,13 +82,14 @@ class RolesController extends Controller
 
         try {
             $validator = Validator::make($request->all(), [
-                'nama_role' => 'required|max:255',
-                'nominal_gaji' => 'required|numeric'
+                'nama_role' => 'max:255|unique:roles,nama_role,'.$id.',id_role',
+                'nominal_gaji' => 'numeric'
             ], $this->validator_exception);
 
             if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }

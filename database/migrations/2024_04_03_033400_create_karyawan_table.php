@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->date('tanggal_masuk');
-            $table->double('bonus_gaji');
+            $table->double('bonus_gaji')->default(0);
             $table->timestamps();
         });
     }
