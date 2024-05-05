@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('bukti_pembayaran')->nullable();
             $table->double('ongkir')->nullable();
             $table->double('total_harga')->nullable();
-            $table->string('total_bayar')->nullable();
+            $table->double('total_bayar')->nullable();
             $table->string('status_transaksi', 100);
             $table->dateTime('tanggal_pesanan')->nullable();
             $table->dateTime('tanggal_diambil')->nullable();

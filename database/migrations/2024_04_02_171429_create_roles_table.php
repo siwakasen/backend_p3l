@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id('id_role');
             $table->string('nama_role');
-            $table->double('nominal_gaji');
+            $table->double('nominal_gaji')->default(0);
             $table->timestamps();
         });
     }

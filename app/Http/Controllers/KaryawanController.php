@@ -15,6 +15,7 @@ class KaryawanController extends Controller
         'nama_karyawan.max' => 'Nama karyawan maksimal 255 karakter!',
         'email.required' => 'Email harus diisi!',
         'email.email' => 'Email tidak valid!',
+        'email.unique' => 'Email sudah terdaftar!',
         'password.required' => 'Password harus diisi!',
         'tanggal_masuk.required' => 'Tanggal masuk harus diisi!',
         'tanggal_masuk.date' => 'Tanggal masuk tidak valid!',
@@ -43,7 +44,7 @@ class KaryawanController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully fetch karyawan data.',
-            'data' => Karyawan::find($id)
+            'data' => Karyawan::find($id)->load('Role')
         ], 200);
     }
 
@@ -53,15 +54,15 @@ class KaryawanController extends Controller
             $validator = Validator::make($request->all(), [
                 'id_role' => 'required|exists:roles,id_role',
                 'nama_karyawan' => 'required|max:255',
-                'email' => 'required|email',
+                'email' => 'required|email|unique:karyawan',
                 'password' => 'required',
                 'tanggal_masuk' => 'required|date',
-                'bonus_gaji' => 'required|numeric|min:0',
             ], $this->validator_exception);
 
             if($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }
@@ -91,17 +92,17 @@ class KaryawanController extends Controller
 
         try{
             $validator = Validator::make($request->all(), [
-                'id_role' => 'required|exists:roles,id_role',
-                'nama_karyawan' => 'required|max:255',
-                'email' => 'required|email',
-                'password' => 'required',
-                'tanggal_masuk' => 'required|date',
-                'bonus_gaji' => 'required|numeric|min:0',
+                'id_role' => 'exists:roles,id_role',
+                'nama_karyawan' => 'max:255',
+                'email' => 'email|unique:karyawan,email,' . $id . ',id_karyawan',
+                'tanggal_masuk' => 'date',
+                'bonus' => 'numeric'
             ], $this->validator_exception);
 
             if($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }
@@ -130,6 +131,13 @@ class KaryawanController extends Controller
         } 
 
         try{
+            if(Auth()->user()->id_karyawan == $id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You cannot delete yourself.'
+                ], 400);
+            }
+            
             Karyawan::destroy($id);
     
             return response()->json([

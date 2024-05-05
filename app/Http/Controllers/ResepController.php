@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Resep;
 use App\Models\DetailResep;
+use App\Models\Produk;
 use Illuminate\Support\Facades\Validator;
 
 class ResepController extends Controller
@@ -53,6 +54,7 @@ class ResepController extends Controller
             if($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
+                    'type' => 'validation',
                     'message' => $validator->errors()
                 ], 400);
             }
@@ -135,9 +137,18 @@ class ResepController extends Controller
         }
 
         try{
+            $resep = Resep::find($id);
+            $produk = Produk::where('id_resep', $id)->get();
+            if(count($produk) > 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Resep cannot be deleted because it is used in some products.'
+                ], 400);
+            }
+            
+            $resep->delete();
+            
             DetailResep::where('id_resep', $id)->delete();
-
-            Resep::find($id)->delete();
             
             return response()->json([
                 'status' => 'success', 
