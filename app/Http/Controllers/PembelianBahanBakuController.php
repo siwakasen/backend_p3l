@@ -23,7 +23,7 @@ class PembelianBahanBakuController extends Controller
 
     public function getAllPembelianBahanBaku()
     {
-        $datas = PembelianBahanBaku::all();
+        $datas = PembelianBahanBaku::with('BahanBaku')->get();
         if (!$datas) {
             return response()->json([
                 'status' => false,
@@ -107,7 +107,7 @@ class PembelianBahanBakuController extends Controller
             'status' => true,
             'message' => 'Success insert a pembelian bahan baku',
             'data' => $data
-        ]);
+        ], 201);
     }
 
     public function deletePembelianBahanBaku(Request $request, String $id)

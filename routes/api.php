@@ -13,6 +13,7 @@ use App\Http\Controllers\HampersController;
 use App\Http\Controllers\LimitProdukController;
 use App\Http\Controllers\PembelianBahanBakuController;
 use App\Http\Controllers\BahanBakuController;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
@@ -160,9 +161,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('bahan-baku')->group(function () {
-        Route::get('/', [BahanBakuController::class, 'getAllBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/search', [BahanBakuController::class, 'searchBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/', [BahanBakuController::class, 'getAllBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
+        Route::get('/search', [BahanBakuController::class, 'searchBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
+        Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
         Route::post('/', [BahanBakuController::class, 'insertBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [BahanBakuController::class, 'deleteBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [BahanBakuController::class, 'updateBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
@@ -174,9 +175,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('penitip')->group(function () {
-        Route::get('/', [PenitipController::class, 'getAllPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
-        Route::get('/search', [PenitipController::class, 'searchPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
-        Route::get('/{id}', [PenitipController::class, 'getPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/', [PenitipController::class, 'getAllPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional,admin');
+        Route::get('/search', [PenitipController::class, 'searchPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional,admin');
+        Route::get('/{id}', [PenitipController::class, 'getPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional,admin');
         Route::post('/', [PenitipController::class, 'insertPenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PenitipController::class, 'updatePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PenitipController::class, 'deletePenitip'])->middleware('auth:sanctum', 'ability:manajer-operasional');
@@ -211,7 +212,23 @@ Route::prefix('administrator')->group(function () {
     |                   Personal Profile                  |
     =======================================================
     */
-    Route::put('/change-password/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+    Route::prefix('change-password')->group(function () {
+        Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+    });
+
+
+    /*
+    =======================================================
+    |                   Kategori Produk                   |
+    =======================================================
+    */
+    Route::prefix('kategori')->group(function () {
+        Route::get('/', [KategoriController::class, 'getAllKategori'])->middleware('auth:sanctum', 'ability:admin, user');
+        Route::get('/{id}', [KategoriController::class, 'getKategori'])->middleware('auth:sanctum', 'ability:admin, user');
+        Route::post('/', [KategoriController::class, 'insertKategori'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/{id}', [KategoriController::class, 'updateKategori'])->middleware('auth:sanctum', 'ability:admin');
+        Route::delete('/{id}', [KategoriController::class, 'deleteKategori'])->middleware('auth:sanctum', 'ability:admin');
+    });
 });
 
 /*

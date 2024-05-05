@@ -386,7 +386,7 @@ class CustomerController extends Controller
         if(!$verify_token || $verify_token->token != $token ){
             return view('verificationFailed');
         }
-        DB::table('password_reset_tokens')->where('token',$token)->update([
+        DB::table('password_reset_tokens')->where('token',$token)->update([ 
             'is_active'=>true
         ]);
         $link = 'http://127.0.0.1:3000/auth/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
@@ -426,6 +426,7 @@ class CustomerController extends Controller
                     'message' => $validator->errors()
                 ], 400);
             }
+
             $user = User::where('email', $request->email)->first();
             if($user == null) {
                 return response()->json([
@@ -566,7 +567,7 @@ class CustomerController extends Controller
     {
         try {
             $searchkey = $request->query('query');
-            $customer = User::where('nama', 'like', '%' . $searchkey . '%')->get();
+            $customer = User::where('nama', 'like', '%' . $searchkey . '%')->select('id_user', 'nama', 'email', 'no_hp')->get();
             if (count($customer) == 0) {
                 throw new \Exception();
             }
@@ -579,7 +580,8 @@ class CustomerController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Customer not found',
-                'error' => $th->getMessage()
+                'error' => $th->getMessage(),
+                'data' => [],
             ], 404);
         }
     }
@@ -613,7 +615,8 @@ class CustomerController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Pesanan not found',
-                'error' => $th->getMessage()
+                'error' => $th->getMessage(),
+                'data' => []
             ], 404);
         }
     }

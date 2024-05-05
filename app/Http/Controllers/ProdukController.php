@@ -121,7 +121,7 @@ class ProdukController extends Controller
             'status' => true,
             'message' => 'Success insert a produk',
             'data' => $produk
-        ]);
+        ], 201);
     }
 
     public function updateProduk(Request $request, String $id)
@@ -148,6 +148,7 @@ class ProdukController extends Controller
             'status_produk' => 'boolean'
         ], $this->validator_exceptions);
 
+
         if ($validate->fails()) {
             return response()->json([
                 'status' => false,
@@ -155,6 +156,8 @@ class ProdukController extends Controller
                 'errors' => $validate->errors()
             ], 400);
         }
+
+
 
         if (!is_null($request->file('foto_produk'))) {
             Storage::disk('public')->delete($produk->foto_produk);

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('foto_hampers');
             $table->text('deskripsi_hampers');
             $table->double('harga_hampers');
+            $table->boolean('status_hampers')->default(true);
             $table->timestamps();
         });
     }

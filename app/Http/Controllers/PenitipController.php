@@ -34,7 +34,7 @@ class PenitipController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Penitip not found',
-                'data' => null
+                'data' => []
             ], 404);
             //throw $th;
         }
@@ -57,7 +57,7 @@ class PenitipController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Penitip not found',
-                'data' => null
+                'data' => []
             ], 404);
         }
         }
@@ -79,9 +79,8 @@ class PenitipController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Penitip not found',
-                'data' => null
+                'data' => []
             ], 404);
-            //throw $th;
         }
     }
 
@@ -136,7 +135,7 @@ class PenitipController extends Controller
                 'nama_penitip' => 'required|max:255',
                 'no_hp' => 'required|numeric|digits_between:11,13',
                 'email' => 'required|email'
-            ],$this->$validator_exception);
+            ],$this->validator_exception);
             
             if($validator->fails()){
                 throw new \Exception('invalid-input');
@@ -154,14 +153,14 @@ class PenitipController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Penitip not found',
-                    'data' => null
+                    'data' => []
                 ], 404);
             }else if($th->getMessage() == 'invalid-input'){
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid input',
                     'error' => $validator->errors(),
-                    'data' => null
+                    'data' => []
                 ], 400);
             }else{
                 return response()->json([
@@ -191,9 +190,15 @@ class PenitipController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Penitip not found',
-                    'data' => null
+                    'data' => []
                 ], 404);
-            }else{
+            }else if(str_contains($th->getMessage(), 'a foreign key constraint fails')){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Penitip cannot be deleted cause still have registered product',
+                ], 400);
+            }
+            else{
                 return response()->json([
                     'status' => false,
                     'message' => 'Invalid request',

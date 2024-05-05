@@ -9,9 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-
-use function Psy\debug;
 
 class HampersController extends Controller
 {
@@ -27,7 +24,8 @@ class HampersController extends Controller
         'foto_hampers.mimes' => 'Foto hampers harus berupa file jpg, png, jpeg!',
         'foto_hampers.max' => 'Foto hampers maksimal 2MB!',
         'detail_hampers.required' => 'Detail hampers harus diisi!',
-        'detail_hampers.array' => 'Detail hampers harus berupa array!'
+        'detail_hampers.array' => 'Detail hampers harus berupa array!',
+        'status_hampers.boolean' => 'Status hampers harus berupa boolean'
     ];
 
     public function getAllHampers()
@@ -42,10 +40,30 @@ class HampersController extends Controller
             ], 404);
         }
 
+        $newHampers = [];
+        foreach ($hampers as $hamper) {
+            $bahan_baku = [];
+            $produk = [];
+            $detail_hampers = DetailHampers::where('id_hampers', $hamper->id_hampers)->get();
+            foreach ($detail_hampers as $detail) {
+                if (!$detail->BahanBaku) {
+                    $produk[] = $detail->Produk;
+                }
+                if (!$detail->Produk) {
+                    $bahan_baku[] = $detail->BahanBaku;
+                }
+            }
+            $hamper['detail'] = [
+                'produk' => $produk,
+                'bahan_baku' => $bahan_baku,
+            ];
+            array_push($newHampers, $hamper);
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Success retrive all hampers',
-            'data' => $hampers
+            'data' => $newHampers
         ]);
     }
 
@@ -101,7 +119,8 @@ class HampersController extends Controller
             'harga_hampers' => 'numeric',
             'deskripsi_hampers' => 'string',
             'foto_hampers' => 'mimes:jpg,png,jpeg|max:2048',
-            'detail_hampers' => 'required|array',
+            'detail_hampers' => 'array',
+            'status_hampers' => 'boolean'
         ], $this->validator_exception);
 
         if ($validate->fails()) {
@@ -133,14 +152,16 @@ class HampersController extends Controller
 
         $hampers->update($data);
 
-        DetailHampers::where('id_hampers', $id)->delete();
+        if (isset($data['detail_hampers'])) {
+            DetailHampers::where('id_hampers', $id)->delete();
 
-        foreach ($data['detail_hampers'] as $detail) {
-            DetailHampers::create([
-                'id_hampers' => $hampers->id_hampers,
-                'id_produk' => $detail['id_produk'] ?? null,
-                'id_bahan_baku' => $detail['id_bahan_baku'] ?? null,
-            ]);
+            foreach ($data['detail_hampers'] as $detail) {
+                DetailHampers::create([
+                    'id_hampers' => $hampers->id_hampers,
+                    'id_produk' => $detail['id_produk'] ?? null,
+                    'id_bahan_baku' => $detail['id_bahan_baku'] ?? null,
+                ]);
+            }
         }
 
         $hampers = Hampers::find($hampers->id_hampers);
@@ -151,6 +172,7 @@ class HampersController extends Controller
             'harga_hampers' => $hampers->harga_hampers,
             'deskripsi_hampers' => $hampers->deskripsi_hampers,
             'foto_hampers' => $hampers->foto_hampers,
+            'status_hampers' => $hampers->status_hampers,
             'created_at' => $hampers->created_at,
             'updated_at' => $hampers->updated_at,
             'detail_hampers' => $detail_hampers,

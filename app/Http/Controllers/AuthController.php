@@ -96,6 +96,13 @@ class AuthController extends Controller
     public function checkToken()
     {
         $user = auth()->user();
+        if(!$user){
+            return response()->json([
+                'status' => true,
+                'message' => 'Token invalid',
+                'data' => $user,
+            ],400);
+        }
 
         if (is_null($user['id_karyawan'])) {
             $payload = [
@@ -109,6 +116,7 @@ class AuthController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'role' => 'User'
             ];
+
         } else {
             $payload = [
                 'id_karyawan' => $user->id_karyawan,
@@ -125,7 +133,7 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Token valid',
             'data' => $payload,
-        ]);
+        ],200);
     }
 
     /*

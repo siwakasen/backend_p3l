@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('detail_hampers', function (Blueprint $table) {
             $table->foreignId('id_produk')->nullable()->references('id_produk')->on('produk')->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('id_bahan_baku')->nullable()->references('id_bahan_baku')->on('bahan_baku')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('id_bahan_baku')->nullable()->references('id_bahan_baku')->on('bahan_baku')->cascadeOnUpdate();
             $table->foreignId('id_hampers')->references('id_hampers')->on('hampers')->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
