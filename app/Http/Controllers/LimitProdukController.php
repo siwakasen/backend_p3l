@@ -107,7 +107,7 @@ class LimitProdukController extends Controller
             'status' => true,
             'message' => 'Data limit produk berhasil ditambahkan',
             'data' => $limitProduk
-        ]);
+        ], 201);
     }
 
     public function deleteLimitProduk(String $id)

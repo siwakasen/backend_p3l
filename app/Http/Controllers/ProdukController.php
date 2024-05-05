@@ -93,6 +93,11 @@ class ProdukController extends Controller
     public function insertProduk(Request $request)
     {
         $produk = $request->all();
+        // return response()->json([
+        //     'status' => false,
+        //     'message' => 'Invalid input',
+        //     'errors' => $request->all()
+        // ], 400);
         $validate = Validator::make($produk, [
             'id_penitip' => 'numeric',
             'id_kategori' => 'required|numeric',
