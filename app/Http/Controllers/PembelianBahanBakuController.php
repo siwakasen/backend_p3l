@@ -102,6 +102,9 @@ class PembelianBahanBakuController extends Controller
             ], 404);
         }
 
+        $resep->stok += $data['jumlah'];
+
+        $resep->save();
         $data = PembelianBahanBaku::create($data);
         return response()->json([
             'status' => true,
@@ -133,6 +136,14 @@ class PembelianBahanBakuController extends Controller
     {
         $request = $request->all();
         $data = PembelianBahanBaku::find($id);
+
+        // return response()->json([
+        //     'status' => false,
+        //     'message' => 'Pembelian Bahan Baku not found',
+        //     'data' => $data,
+        //     'request' => $request,
+        //     'id' => $id
+        // ], 200);
         if (!$data) {
             return response()->json([
                 'status' => false,
@@ -156,6 +167,26 @@ class PembelianBahanBakuController extends Controller
             ], 400);
         }
 
+        $bahan_baku = BahanBaku::find($request['id_bahan_baku']);
+        if (!$bahan_baku) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Bahan Baku not found',
+                'data' => null
+            ], 404);
+        }
+
+        if ($data['id_bahan_baku'] != $request['id_bahan_baku']) {
+            $old_bahan_baku = BahanBaku::find($data['id_bahan_baku']);
+            $old_bahan_baku->stok -= $data['jumlah'];
+            $bahan_baku->stok += $request['jumlah'];
+            $old_bahan_baku->save();
+        } else {
+            $bahan_baku->stok -= $data['jumlah'];
+            $bahan_baku->stok += $request['jumlah'];
+        }
+
+        $bahan_baku->save();
         $data->update($request);
         return response()->json([
             'status' => true,

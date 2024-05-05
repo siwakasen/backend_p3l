@@ -127,7 +127,7 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('limit-produk')->group(function () {
         Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::get('/', [LimitProdukController::class, 'getAllLimitProduct'])->middleware('auth:sanctum', 'ability:admin');
-        Route::put('/{id}', [LimitProdukController::class, 'udpateLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/{id}', [LimitProdukController::class, 'updateLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [LimitProdukController::class, 'insertLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
     });
