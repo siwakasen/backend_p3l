@@ -27,13 +27,13 @@ class PenitipController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get all penitip',
+                'message' => 'Berhasil mengambil semua data penitip',
                 'data' => $penitip
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Penitip not found',
+                'message' => 'Data penitip tidak ditemukan',
                 'data' => []
             ], 404);
             //throw $th;
@@ -49,14 +49,14 @@ class PenitipController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get penitip by id',
+                'message' => 'Berhasil mengambil data penitip',
                 'data' => $penitip
             ]);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
                 'status' => false,
-                'message' => 'Penitip not found',
+                'message' => 'Data penitip tidak ditemukan',
                 'data' => []
             ], 404);
         }
@@ -72,13 +72,13 @@ class PenitipController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get penitip by nama',
+                'message' => 'Berhasil mencari data penitip',
                 'data' => $data
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
-                'message' => 'Penitip not found',
+                'message' => 'Data penitip tidak ditemukan',
                 'data' => []
             ], 404);
         }
@@ -95,27 +95,26 @@ class PenitipController extends Controller
             ], $this->validator_exception);
             
             if($validator->fails()){
-                throw new \Exception('invalid-input');
+                throw new \Exception('input-invalid');
             }
 
             $penitip = Penitip::create($data);
             return response()->json([
                 'status' => true,
-                'message' => 'Success insert penitip',
+                'message' => 'Berhasil menambahkan data penitip',
                 'data' => $penitip
             ]);
         } catch (\Throwable $th) {
             //throw $th;
-            if($th->getMessage() == 'invalid-input'){
+            if($th->getMessage() == 'input-invalid'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid input',
-                    'error' => $validator->errors(),
+                    'message' => $validator->errors(),
                 ], 400);
             }else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request',
+                    'message' => 'Gagal menambahkan data penitip',
                     'error'=> $th->getMessage()
                 ], 400);
             }
@@ -144,7 +143,7 @@ class PenitipController extends Controller
             $penitip->update($data);
             return response()->json([
                 'status' => true,
-                'message' => 'Success update penitip',
+                'message' => 'Berhasil mengubah data penitip',
                 'data' => $penitip
             ]);
         } catch (\Throwable $th) {
@@ -152,20 +151,19 @@ class PenitipController extends Controller
             if($th->getMessage() == 'not-found'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Penitip not found',
+                    'message' => 'Data penitip tidak ditemukan',
                     'data' => []
                 ], 404);
             }else if($th->getMessage() == 'invalid-input'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid input',
-                    'error' => $validator->errors(),
+                    'message' => $validator->errors(),
                     'data' => []
                 ], 400);
             }else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request',
+                    'message' => 'Gagal mengubah data penitip',
                     'error'=> $th->getMessage()
                 ], 400);
             }
@@ -181,7 +179,7 @@ class PenitipController extends Controller
             $penitip->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Success delete penitip',
+                'message' => 'Berhasil hapus data penitip',
                 'data' => $penitip
             ]);
 
@@ -189,20 +187,21 @@ class PenitipController extends Controller
             if($th->getMessage() == 'not-found'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Penitip not found',
+                    'message' => 'Data penitip tidak ditemukan',
                     'data' => []
                 ], 404);
             }else if(str_contains($th->getMessage(), 'a foreign key constraint fails')){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Penitip cannot be deleted cause still have registered product',
+                    'message'=> 'Data penitip tidak bisa dihapus karena memiliki produk yang terdaftar',
                 ], 400);
             }
             else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request',
-                    'error'=> $th->getMessage()
+                    'message' => 'Gagal menghapus data penitip',
+                    'error'=> $th->getMessage(),
+                    'data'=>[]
                 ], 400);
             }
         }
