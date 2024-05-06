@@ -476,23 +476,7 @@ class CustomerController extends Controller
         }
         try {
             $id = Auth::user()->id_user;
-            $data = Pesanan::where('id_user', $id)->where('status_transaksi', 'Pesanan Sudah Selesai')->get();
-
-            foreach ($data as $value) {
-                $detail = DB::table('detail_pesanan')
-                    ->where('id_pesanan', $value->id_pesanan)
-                    ->join('produk', 'detail_pesanan.id_produk', '=', 'produk.id_produk')
-                    ->select(
-                        'detail_pesanan.id_produk',
-                        'detail_pesanan.id_hampers',
-                        'detail_pesanan.jumlah',
-                        'detail_pesanan.subtotal',
-                        'produk.nama_produk', 
-                        'produk.harga_produk'
-                    )
-                    ->get();
-                $value->detail_pesanan = $detail;
-            }
+            $data = Pesanan::where('id_user', $id)->where('status_transaksi', 'Pesanan Sudah Selesai')->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers');
 
             return response()->json([
                 'status' => 'success',
