@@ -295,7 +295,7 @@ class CustomerController extends Controller
                 ], 404);
             }
 
-            if ($request->email != $user->email) {
+            if ($request->email != $user->email)    {
                 if (User::where('email', $request->email)->first() != null) {
                     return response()->json([
                         'status' => 'error',
@@ -389,7 +389,7 @@ class CustomerController extends Controller
         DB::table('password_reset_tokens')->where('token',$token)->update([ 
             'is_active'=>true
         ]);
-        $link = 'http://127.0.0.1:3000/auth/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
+        $link = 'http://127.0.0.1:3000/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
         return view('verificationSuccess', compact('link'));
     }
     
