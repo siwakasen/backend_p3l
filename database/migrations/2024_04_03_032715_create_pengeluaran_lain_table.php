@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nama_pengeluaran');
             $table->double('nominal_pengeluaran');
             $table->date('tanggal_pengeluaran');
+            $table->boolean('status_pengeluaran_lain')->default(true);
             $table->timestamps();
         });
     }
