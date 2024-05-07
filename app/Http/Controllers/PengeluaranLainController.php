@@ -158,7 +158,35 @@ class PengeluaranLainController extends Controller
                 ],400);
             }
         }
-        
+    }
+
+    public function restorePengeluaranLain($id){
+        try {
+            $pengeluaran_lain = PengeluaranLain::find($id);
+            if(!$pengeluaran_lain){
+                throw new \Exception('not-found');
+            }
+            $pengeluaran_lain->status_pengeluaran_lain = true;
+            $pengeluaran_lain->update();
+            return response()->json([
+                'status'=>true,
+                'message'=>'Berhasil mengembalikan data pengeluaran lain',
+                'data'=>$pengeluaran_lain
+            ],200);
+        } catch (\Throwable $th) {
+            if($th->getMessage() === 'not-found'){
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Data pengeluaran lain tidak ditemukan',
+                ],404);
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Gagal mengembalikan data pengeluaran lain',
+                    'error'=>$th->getMessage()
+                ],400);
+            }
+        }
     }
 
     public function deletePengeluaranLain($id){
@@ -167,7 +195,8 @@ class PengeluaranLainController extends Controller
             if(!$pengeluaran_lain){
                 throw new \Exception('not-found');
             }
-            $pengeluaran_lain->delete();
+            $pengeluaran_lain->status_pengeluaran_lain = false;
+            $pengeluaran_lain->update();
             return response()->json([
                 'status'=>true,
                 'message'=>'Berhasil menghapus data pengeluaran lain',

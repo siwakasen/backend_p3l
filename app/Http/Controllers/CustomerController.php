@@ -599,7 +599,10 @@ class CustomerController extends Controller
                     }]);
             }])
                 ->where('id_user', $id)
-                ->where('status_transaksi', 'Pesanan Sudah Selesai')
+                ->where(function ($query) {
+                    $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                        ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
+                })
                 ->get();
 
 
