@@ -295,7 +295,7 @@ class CustomerController extends Controller
                 ], 404);
             }
 
-            if ($request->email != $user->email)    {
+            if ($request->email != $user->email){
                 if (User::where('email', $request->email)->first() != null) {
                     return response()->json([
                         'status' => 'error',
