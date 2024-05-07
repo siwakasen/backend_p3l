@@ -28,8 +28,10 @@ class ProdukController extends Controller
         'deskripsi_produk.string' => 'Deskripsi produk harus berupa huruf',
         'harga_produk.required' => 'Harga produk harus diisi',
         'harga_produk.numeric' => 'Harga produk harus berupa angka',
+        'harga_produk.gt' => 'Harga produk harus lebih besar dari 0',
         'stok_produk.required' => 'Stok produk harus diisi',
         'stok_produk.numeric' => 'Stok produk harus berupa angka',
+        'stok_produk.gte' => 'Stok produk tidak boleh minus',
         'id_penitip.numeric' => 'Id penitip harus berupa angka',
         'status_produk.boolean' => 'Status produk harus berupa boolean'
     ];
@@ -93,11 +95,6 @@ class ProdukController extends Controller
     public function insertProduk(Request $request)
     {
         $produk = $request->all();
-        // return response()->json([
-        //     'status' => false,
-        //     'message' => 'Invalid input',
-        //     'errors' => $request->all()
-        // ], 400);
         $validate = Validator::make($produk, [
             'id_penitip' => 'numeric',
             'id_kategori' => 'required|numeric',
@@ -105,8 +102,8 @@ class ProdukController extends Controller
             'id_resep' => 'numeric',
             'foto_produk' => 'required|mimes:jpg,png,jpeg|max:2048',
             'deskripsi_produk' => 'required|string',
-            'harga_produk' => 'required|numeric',
-            'stok_produk' => 'required|numeric',
+            'harga_produk' => 'required|numeric|gt:0',
+            'stok_produk' => 'required|numeric|gte:0',
         ], $this->validator_exceptions);
 
         if ($validate->fails()) {
@@ -148,8 +145,8 @@ class ProdukController extends Controller
             'id_resep' => 'numeric',
             'foto_produk' => 'mimes:jpg,png,jpeg|max:2048',
             'deskripsi_produk' => 'string',
-            'harga_produk' => 'numeric',
-            'stok_produk' => 'numeric',
+            'harga_produk' => 'numeric|gt:0',
+            'stok_produk' => 'numeric|gte:0',
             'status_produk' => 'boolean'
         ], $this->validator_exceptions);
 

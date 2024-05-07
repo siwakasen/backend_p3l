@@ -15,8 +15,10 @@ class PembelianBahanBakuController extends Controller
         'id_bahan_baku.numeric' => 'Id bahan baku harus berupa angka',
         'jumlah.required' => 'Jumlah harus diisi',
         'jumlah.numeric' => 'Jumlah harus berupa angka',
+        'jumlah.gt' => 'Jumlah harus lebih besar dari 0',
         'harga.required' => 'Harga harus diisi',
         'harga.numeric' => 'Harga harus berupa angka',
+        'harga.gt' => 'Harga harus lebih besar dari 0',
         'tanggal_pembelian.required' => 'Tanggal pembelian harus diisi',
         'tanggal_pembelian.date' => 'Tanggal pembelian harus berupa tanggal',
     ];
@@ -80,8 +82,8 @@ class PembelianBahanBakuController extends Controller
         $data = $request->all();
         $validate = Validator::make($data, [
             'id_bahan_baku' => 'required|numeric',
-            'jumlah' => 'required|numeric',
-            'harga' => 'required|numeric',
+            'jumlah' => 'required|numeric|gt:0',
+            'harga' => 'required|numeric|gt:0',
             'tanggal_pembelian' => 'required|date',
         ], $this->validator_exception);
 
@@ -137,13 +139,6 @@ class PembelianBahanBakuController extends Controller
         $request = $request->all();
         $data = PembelianBahanBaku::find($id);
 
-        // return response()->json([
-        //     'status' => false,
-        //     'message' => 'Pembelian Bahan Baku not found',
-        //     'data' => $data,
-        //     'request' => $request,
-        //     'id' => $id
-        // ], 200);
         if (!$data) {
             return response()->json([
                 'status' => false,
@@ -154,8 +149,8 @@ class PembelianBahanBakuController extends Controller
 
         $validate = Validator::make($request, [
             'id_bahan_baku' => 'numeric',
-            'jumlah' => 'numeric',
-            'harga' => 'numeric',
+            'jumlah' => 'numeric|gt:0',
+            'harga' => 'numeric|gt:0',
             'tanggal_pembelian' => 'date',
         ], $this->validator_exception);
 
