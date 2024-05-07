@@ -223,8 +223,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('kategori')->group(function () {
-        Route::get('/', [KategoriController::class, 'getAllKategori'])->middleware('auth:sanctum', 'ability:admin, user');
-        Route::get('/{id}', [KategoriController::class, 'getKategori'])->middleware('auth:sanctum', 'ability:admin, user');
+        Route::get('/', [KategoriController::class, 'getAllKategori'])->middleware('auth:sanctum', 'ability:admin,user');
+        Route::get('/{id}', [KategoriController::class, 'getKategori'])->middleware('auth:sanctum', 'ability:admin,user');
         Route::post('/', [KategoriController::class, 'insertKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [KategoriController::class, 'updateKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [KategoriController::class, 'deleteKategori'])->middleware('auth:sanctum', 'ability:admin');
@@ -261,6 +261,5 @@ Route::prefix('customer')->group(function () {
     */
     Route::prefix('history')->group(function () {
         Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
-        Route::post('/', [CustomerController::class, 'searchTransaction'])->middleware('auth:sanctum', 'ability:user');
     });
 });

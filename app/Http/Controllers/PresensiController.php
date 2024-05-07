@@ -20,11 +20,11 @@ class PresensiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully fetch presensi data.',
-            'data' => Presensi::all()->load('Karyawan')
+            'data' => Presensi::all()->load('Karyawan.Role')
         ], 200);
     }
 
-    public function getPresensi(Date $tanggal)
+    public function getPresensi($tanggal)
     {
         if (Presensi::where('tanggal', $tanggal)->first() == null) {
             return response()->json([
@@ -36,7 +36,7 @@ class PresensiController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully fetch presensi data.',
-            'data' => Presensi::where('tanggal', $tanggal)->get()
+            'data' => Presensi::where('tanggal', $tanggal)->get()->load('Karyawan.Role')
         ], 200);
     }
 
@@ -54,7 +54,7 @@ class PresensiController extends Controller
                 ], 400);
             }
 
-            $karyawan = Karyawan::all();
+            $karyawan = Karyawan::all()->load('Role')->where('Role.nama_role', '!=', 'Owner');
             foreach ($karyawan as $k) {
                 Presensi::create([
                     'id_karyawan' => $k->id_karyawan,
