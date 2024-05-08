@@ -477,8 +477,10 @@ class CustomerController extends Controller
         try {
             $id = Auth::user()->id_user;
             $data = Pesanan::where('id_user', $id)
-            ->where('status_transaksi', 'Pesanan Sudah Selesai')
-            ->orWhere('status_transaksi', 'Pesanan Dibatalkan')
+            ->where(function($query){
+                $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
+            })
             ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
 
             return response()->json([
