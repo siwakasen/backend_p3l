@@ -13,6 +13,7 @@ class BahanBakuController extends Controller
         'nama_bahan_baku.max' => 'Nama bahan baku maksimal 255 karakter!',
         'stok.required' => 'Stok harus diisi!',
         'stok.numeric' => 'Stok harus berupa angka!',
+        'stok.min' => 'Stok minimal 0!',
         'satuan.required' => 'Satuan harus diisi!',
         'satuan.max' => 'Satuan maksimal 255 karakter!'
     ];
@@ -25,7 +26,7 @@ class BahanBakuController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get all bahan baku',
+                'message' => 'Berhasil mengambil semua data bahan baku',
                 'data' => $bahan_baku
             ]);
 
@@ -33,8 +34,8 @@ class BahanBakuController extends Controller
             //throw $th;
             return response()->json([
                 'status' => false,
-                'message' => 'Bahan baku not found',
-                'data' => null
+                'message' => 'Data bahan baku tidak ditemukan',
+                'data' => []
             ], 404);
         }
     }
@@ -48,15 +49,15 @@ class BahanBakuController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get bahan baku by id',
+                'message' => 'Berhasil mengambil data bahan baku',
                 'data' => $bahan_baku
             ]);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
                 'status' => false,
-                'message' => 'Bahan baku not found',
-                'data' => null
+                'message' => 'Data bahan baku tidak ditemukan',
+                'data' => []
             ], 404);
         }
     }
@@ -71,14 +72,14 @@ class BahanBakuController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get bahan baku by nama',
+                'message' => 'Berhasil mencari data bahan baku',
                 'data' => $data
             ]);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
                 'status' => false,
-                'message' => 'Bahan Baku not found',
+                'message' => 'Data bahan baku tidak ditemukan',
                 'data' => []
             ], 404);
         }
@@ -90,7 +91,7 @@ class BahanBakuController extends Controller
             $data =  $request->all();
             $validate = Validator::make($data, [
                 'nama_bahan_baku' => 'required|max:255',
-                'stok' => 'required|numeric',
+                'stok' => 'required|numeric|min:0',
                 'satuan' => 'required|max:255',
             ], $this->validator_exception);
     
@@ -100,7 +101,7 @@ class BahanBakuController extends Controller
             $bahan_baku = BahanBaku::create($data);
             return response()->json([
                 'status' => true,
-                'message' => 'Success insert bahan baku',
+                'message' => 'Berhasil menambah data bahan baku',
                 'data' => $bahan_baku
             ],200);
         } catch (\Throwable $th) {
@@ -108,13 +109,12 @@ class BahanBakuController extends Controller
             if($th->getMessage() == 'invalid-input'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid input',
-                    'errors'=> $validate->errors()
+                    'message' => $validate->errors(),
                 ], 400);
             }else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request',
+                    'message' => 'Gagal menambah data bahan baku',
                     'error'=> $th->getMessage()
                 ], 400);
             }
@@ -132,7 +132,7 @@ class BahanBakuController extends Controller
             $data =  $request->all();
             $validate = Validator::make($data, [
                 'nama_bahan_baku' => 'required|max:255',
-                'stok' => 'required|numeric',
+                'stok' => 'required|numeric|min:0',
                 'satuan' => 'required|max:255',
             ],$this->validator_exception);
             if($validate->fails()){
@@ -142,7 +142,7 @@ class BahanBakuController extends Controller
             $bahan_baku->update($data);
             return response()->json([
                 'status' => true,
-                'message' => 'Success update bahan baku',
+                'message' => 'Berhasil mengubah data bahan baku',
                 'data' => $bahan_baku,
             ],200);
         } catch (\Throwable $th) {
@@ -150,20 +150,18 @@ class BahanBakuController extends Controller
             if($th->getMessage() == 'not-found'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Bahan baku not found',
-                    'data' => null
+                    'message' => 'Data bahan baku tidak ditemukan',
                 ], 404);
             }else if($th->getMessage() == 'invalid-input'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid input',
-                    'errors'=> $validate->errors()
+                    'message' => $validate->errors(),
                 ], 400);
             }
             else{
                 return response()->json([
                     'status' => false,
-                    'message' => 'Invalid request',
+                    'message' => 'Gagal mengubah data bahan baku',
                     'error'=> $th->getMessage()
                 ], 400);
             }
@@ -181,7 +179,7 @@ class BahanBakuController extends Controller
             $bahan_baku->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Success delete bahan baku',
+                'message' => 'Berhasil mengubah data bahan baku',
                 'data' => $bahan_baku
             ],200);
             
@@ -190,19 +188,18 @@ class BahanBakuController extends Controller
             if($th->getMessage() == 'not-found'){
                 return response()->json([
                     'status' => false,
-                    'message' => 'Bahan baku not found',
-                    'data' => null
+                    'message' => 'Data bahan baku tidak ditemukan',
                 ], 404);
             }else{
                 if(str_contains($th->getMessage(), 'foreign key constraint fails')){
                     return response()->json([
                         'status' => false,
-                        'message' => 'Bahan baku cannot be deleted because it is used in other tables',
+                        'message' => 'Bahan baku tidak dapat dihapus karena digunakan pada hampers/produk',
                     ], 400);
                 }
                 return response()->json([
                     'status' => false,
-                    'message' => 'Failed delete bahan baku',
+                    'message' => 'Gagal menghapus data bahan baku',
                     'error'=> $th->getMessage()
                 ], 400);
             }

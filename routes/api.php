@@ -194,6 +194,7 @@ Route::prefix('administrator')->group(function () {
         Route::get('/{id}', [PengeluaranLainController::class, 'getPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::post('/', [PengeluaranLainController::class, 'insertPengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/{id}', [PengeluaranLainController::class, 'updatePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/status/{id}', [PengeluaranLainController::class, 'restorePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::delete('/{id}', [PengeluaranLainController::class, 'deletePengeluaranLain'])->middleware('auth:sanctum', 'ability:manajer-operasional');
     });
 

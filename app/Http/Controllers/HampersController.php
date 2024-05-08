@@ -18,6 +18,7 @@ class HampersController extends Controller
         'nama_hampers.string' => 'Nama hampers harus berupa huruf!',
         'harga_hampers.required' => 'Harga hampers harus diisi!',
         'harga_hampers.numeric' => 'Harga hampers harus berupa angka!',
+        'harga_hampers.gt' => 'Harga hampers harus lebih besar dari 0!',
         'deskripsi_hampers.required' => 'Deskripsi hampers harus diisi!',
         'deskripsi_hampers.string' => 'Deskripsi hampers harus berupa huruf!',
         'foto_hampers.required' => 'Foto hampers harus diisi!',
@@ -116,7 +117,7 @@ class HampersController extends Controller
 
         $validate = Validator::make($data, [
             'nama_hampers' => 'string|unique:hampers,nama_hampers,' . $id . ',id_hampers',
-            'harga_hampers' => 'numeric',
+            'harga_hampers' => 'numeric|gt:0',
             'deskripsi_hampers' => 'string',
             'foto_hampers' => 'mimes:jpg,png,jpeg|max:2048',
             'detail_hampers' => 'array',
@@ -189,7 +190,7 @@ class HampersController extends Controller
         $data = $request->all();
         $validate = Validator::make($data, [
             'nama_hampers' => 'required|string|unique:hampers',
-            'harga_hampers' => 'required|numeric',
+            'harga_hampers' => 'required|numeric|gt:0',
             'deskripsi_hampers' => 'required|string',
             'foto_hampers' => 'required|mimes:jpg,png,jpeg|max:2048',
             'detail_hampers' => 'required|array',

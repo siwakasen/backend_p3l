@@ -14,8 +14,9 @@ class PengeluaranLainController extends Controller
         'nama_pengeluaran.max' => 'Nama pengeluaran maksimal 255 karakter!',
         'nominal_pengeluaran.required' => 'Nominal pengeluaran harus diisi!',
         'nominal_pengeluaran.numeric' => 'Nominal pengeluaran harus berupa angka!',
+        'nominal_pengeluaran.min' => 'Nominal pengeluaran minimal 1!',
         'tanggal_pengeluaran.required' => 'Tanggal pengeluaran harus diisi!',
-        'tanggal_pengeluaran.date' => 'Tanggal pengeluaran tidak valid!'
+        'tanggal_pengeluaran.date' => 'Tanggal pengeluaran tidak valid!',
     ];
     public function getAllPengeluaranLain(){
         try {
@@ -26,14 +27,15 @@ class PengeluaranLainController extends Controller
             }
             return response()->json([
                 'status' => true,
-                'message' => 'Success get all pengeluaran lain',
+                'message' => 'Berhasil mengambil semua data pengeluaran lain',
                 'data' => $pengeluaran_lain
             ],200);
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
                 'status' => false,
-                'message' => 'Pengeluaran lain not found',
+                'message' => 'Data pengeluaran lain tidak ditemukan',
+                'error' => 'Request invalid',
                 'data' => []
             ], 404);
         }
@@ -47,13 +49,13 @@ class PengeluaranLainController extends Controller
             }
             return response()->json([
                 'status'=>true,
-                'message'=>'Success get pengeluaran lain by id',
+                'message'=>'Berhasil mengambil data pengeluaran lain',
                 'data'=>$pengeluaran_lain
             ],200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status'=>false,
-                'message'=>'Pengeluaran lain not found',
+                'message'=>'Data pengeluaran lain tidak ditemukan',
                 'data'=> []
             ],404);
         }
@@ -67,13 +69,13 @@ class PengeluaranLainController extends Controller
                 }
                 return response()->json([
                     'status'=>true,
-                    'message'=>'Success get pengeluaran lain by id',
+                    'message'=>'Berhasil mencari data pengeluaran lain',
                     'data'=>$pengeluaran_lain
                 ],200);
             } catch (\Throwable $th) {
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Pengeluaran lain not found',
+                    'message'=>'Data pengeluaran lain tidak ditemukan',
                     'data'=> []
                 ],404);
             }
@@ -84,7 +86,7 @@ class PengeluaranLainController extends Controller
             $data = $request->all();
             $validate = Validator::make($data,[
                 'nama_pengeluaran' => 'required|max:255',
-                'nominal_pengeluaran' => 'required|numeric',
+                'nominal_pengeluaran' => 'required|numeric|min:1',
                 'tanggal_pengeluaran' => 'required|date'
             ],$this->validator_exception);
 
@@ -94,20 +96,19 @@ class PengeluaranLainController extends Controller
             $pengeluaran_lain = PengeluaranLain::create($data);
             return response()->json([
                 'status'=>true,
-                'message'=>'Success insert pengeluaran lain',
+                'message'=>'Berhasil menambahkan data pengeluaran lain',
                 'data'=>$pengeluaran_lain
             ],200);
         } catch (\Throwable $th) {
             if($th->getMessage() === 'invalid-input'){
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Invalid input',
-                    'errors'=>$validate->errors()
+                    'message'=>$validate->errors(),
                 ],400);
             }else{
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Invalid request',
+                    'message'=>'Gagal menambahkan data pengeluaran lain',
                     'error'=>$th->getMessage()
                 ],400);
             }
@@ -124,7 +125,7 @@ class PengeluaranLainController extends Controller
             $data = $request->all();
             $validate = Validator::make($data,[
                 'nama_pengeluaran' => 'required|max:255',
-                'nominal_pengeluaran' => 'required|numeric',
+                'nominal_pengeluaran' => 'required|numeric|min:1',
                 'tanggal_pengeluaran' => 'required|date'
             ],$this->validator_exception);
         
@@ -135,31 +136,57 @@ class PengeluaranLainController extends Controller
             $pengeluaran_lain->update($data);
             return response()->json([
                 'status'=>true,
-                'message'=>'Success update pengeluaran lain',
+                'message'=>'Berhasil mengubah data pengeluaran lain',
                 'data'=>$pengeluaran_lain
             ],200);
         } catch (\Throwable $th) {
             if ($th->getMessage() === 'not-found') {
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Pengeluaran lain not found',
-                    'data'=>null
+                    'message'=>'Data pengeluaran lain tidak ditemukan',
                 ],404);
             }else if($th->getMessage() === 'invalid-input'){
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Invalid input',
-                    'errors'=>$validate->errors()
+                    'message'=>$validate->errors(),
                 ],400);
             }else {
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Invalid request',
+                    'message'=>'Gagal mengubah data pengeluaran lain',
                     'error'=>$th->getMessage()
                 ],400);
             }
         }
-        
+    }
+
+    public function restorePengeluaranLain($id){
+        try {
+            $pengeluaran_lain = PengeluaranLain::find($id);
+            if(!$pengeluaran_lain){
+                throw new \Exception('not-found');
+            }
+            $pengeluaran_lain->status_pengeluaran_lain = true;
+            $pengeluaran_lain->update();
+            return response()->json([
+                'status'=>true,
+                'message'=>'Berhasil mengembalikan data pengeluaran lain',
+                'data'=>$pengeluaran_lain
+            ],200);
+        } catch (\Throwable $th) {
+            if($th->getMessage() === 'not-found'){
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Data pengeluaran lain tidak ditemukan',
+                ],404);
+            }else{
+                return response()->json([
+                    'status'=>false,
+                    'message'=>'Gagal mengembalikan data pengeluaran lain',
+                    'error'=>$th->getMessage()
+                ],400);
+            }
+        }
     }
 
     public function deletePengeluaranLain($id){
@@ -168,24 +195,24 @@ class PengeluaranLainController extends Controller
             if(!$pengeluaran_lain){
                 throw new \Exception('not-found');
             }
-            $pengeluaran_lain->delete();
+            $pengeluaran_lain->status_pengeluaran_lain = false;
+            $pengeluaran_lain->update();
             return response()->json([
                 'status'=>true,
-                'message'=>'Success delete pengeluaran lain',
+                'message'=>'Berhasil menghapus data pengeluaran lain',
                 'data'=>$pengeluaran_lain
             ],200);
         } catch (\Throwable $th) {
             if($th->getMessage() === 'not-found'){
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Pengeluaran lain not found',
-                    'data'=>null
+                    'message'=>'Data pengeluaran lain tidak ditemukan',
                 ],404);
             }else{
                 return response()->json([
                     'status'=>false,
-                    'message'=>'Failed delete pengeluaran lain',
-                    'data'=>null
+                    'message'=>'Gagal menghapus data pengeluaran lain',
+                    'error'=>$th->getMessage()
                 ],400);
             }
         }

@@ -389,7 +389,7 @@ class CustomerController extends Controller
         DB::table('password_reset_tokens')->where('token',$token)->update([ 
             'is_active'=>true
         ]);
-        $link = 'http://127.0.0.1:3000/auth/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
+        $link = 'http://127.0.0.1:3000/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
         return view('verificationSuccess', compact('link'));
     }
     
@@ -537,7 +537,10 @@ class CustomerController extends Controller
                     }]);
             }])
                 ->where('id_user', $id)
-                ->where('status_transaksi', 'Pesanan Sudah Selesai')
+                ->where(function ($query) {
+                    $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                        ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
+                })
                 ->get();
 
 
