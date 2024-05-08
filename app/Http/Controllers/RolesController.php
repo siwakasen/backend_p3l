@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Karyawan;
 use Illuminate\Http\Request;
 use App\Models\Roles;
 use Illuminate\Support\Facades\Validator;
@@ -118,6 +119,13 @@ class RolesController extends Controller
         } 
 
         try{
+            $karyawan = Karyawan::all()->load('Role')->where('Role.nama_role', '=', Roles::find($id)->nama_role);
+            if ($karyawan->count() > 0) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Role cannot be deleted because it is used by employee.'
+                ], 400);
+            }
             Roles::destroy($id);
             return response()->json([
                 'status' => 'success',

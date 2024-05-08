@@ -476,23 +476,12 @@ class CustomerController extends Controller
         }
         try {
             $id = Auth::user()->id_user;
-            $data = Pesanan::where('id_user', $id)->where('status_transaksi', 'Pesanan Sudah Selesai')->get();
-
-            foreach ($data as $value) {
-                $detail = DB::table('detail_pesanan')
-                    ->where('id_pesanan', $value->id_pesanan)
-                    ->join('produk', 'detail_pesanan.id_produk', '=', 'produk.id_produk')
-                    ->select(
-                        'detail_pesanan.id_produk',
-                        'detail_pesanan.id_hampers',
-                        'detail_pesanan.jumlah',
-                        'detail_pesanan.subtotal',
-                        'produk.nama_produk', 
-                        'produk.harga_produk'
-                    )
-                    ->get();
-                $value->detail_pesanan = $detail;
-            }
+            $data = Pesanan::where('id_user', $id)
+            ->where(function($query){
+                $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
+            })
+            ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
 
             return response()->json([
                 'status' => 'success',
@@ -506,57 +495,6 @@ class CustomerController extends Controller
             ], 400);
         }
     }
-
-    public function searchTransaction(Request $request)
-    {
-        $id = Auth::user()->id_user;
-        if ($id == null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized'
-            ], 401);
-        }
-        $user = User::find($id);
-
-        if ($user == null) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'User not found.'
-            ], 404);
-        }
-        try {
-            $validator = Validator::make(
-                $request->all(),
-                [
-                    'nama_produk' => 'required'
-                ],
-                [
-                    'nama_produk.required' => 'Nama produk harus diisi!'
-                ]
-            );
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()
-                ], 400);
-            }
-
-            $data = Pesanan::where('id_user', $id)->where('nama_produk', 'like', '%' . $request->nama_produk . '%')->get();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Transaction history fetched successfully.',
-                'data' => $data
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error: ' . $e->getMessage()
-            ], 400);
-        }
-    }
-
 
     /*
     ===============================================
