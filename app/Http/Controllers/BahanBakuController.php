@@ -179,7 +179,7 @@ class BahanBakuController extends Controller
             $bahan_baku->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil mengubah data bahan baku',
+                'message' => 'Berhasil menghapus data bahan baku',
                 'data' => $bahan_baku
             ],200);
             
