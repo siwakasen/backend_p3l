@@ -505,7 +505,10 @@ class CustomerController extends Controller
     {
         try {
             $searchkey = $request->query('query');
-            $customer = User::where('nama', 'like', '%' . $searchkey . '%')->select('id_user', 'nama', 'email', 'no_hp')->get();
+            $customer = User::where('nama', 'like', '%' . $searchkey . '%')
+                                ->orWhere('email', 'like', '%' . $searchkey . '%')
+                                ->orWhere('no_hp', 'like', '%' . $searchkey . '%')
+                                ->select('id_user', 'nama', 'email', 'no_hp')->get();
             if (count($customer) == 0) {
                 throw new \Exception();
             }
