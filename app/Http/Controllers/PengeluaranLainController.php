@@ -63,7 +63,10 @@ class PengeluaranLainController extends Controller
     public function searchPengeluaranLain(Request $request){
         try {
                 $searchkey = $request->query('query');
-                $pengeluaran_lain = PengeluaranLain::where('nama_pengeluaran', 'like', "%$searchkey%")->get();
+                $pengeluaran_lain = PengeluaranLain::where('nama_pengeluaran', 'like', "%$searchkey%")
+                                                    ->orWhere('nominal_pengeluaran', 'like', "%$searchkey%")
+                                                    ->orWhere('tanggal_pengeluaran', 'like', "%$searchkey%")
+                                                    ->get();
                 if(count($pengeluaran_lain)==0){
                     throw new \Exception();
                 }
