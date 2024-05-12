@@ -66,7 +66,10 @@ class BahanBakuController extends Controller
         try {
             //code...
             $searchkey = $request->query('query');
-            $data = BahanBaku::where('nama_bahan_baku', 'like', "%$searchkey%")->get();
+            $data = BahanBaku::where('nama_bahan_baku', 'like', "%$searchkey%")
+                            ->orWhere('satuan', 'like', "%$searchkey%")
+                            ->orWhere('stok', 'like', "%$searchkey%")
+                            ->get();
             if(count($data) == 0){
                 throw new \Exception();
             }
