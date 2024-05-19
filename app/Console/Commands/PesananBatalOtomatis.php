@@ -28,9 +28,6 @@ class PesananBatalOtomatis extends Command
      */
     public function handle()
     {
-        $yesterday = Carbon::yesterday()->toDateString();
-        $currentDate = Carbon::now()->toDateString();
-
         DB::table('pesanan')
             ->where('status_transaksi', 'Pesanan Belum Dibayar')
             ->where(function ($query) {
