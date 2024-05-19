@@ -263,4 +263,8 @@ Route::prefix('customer')->group(function () {
     Route::prefix('history')->group(function () {
         Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
     });
+    Route::prefix('pesanan')->group(function () {
+        Route::get('/', [CustomerController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/bayar/{id}', [CustomerController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
+    });
 });
