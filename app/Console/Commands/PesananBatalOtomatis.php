@@ -30,10 +30,7 @@ class PesananBatalOtomatis extends Command
     {
         DB::table('pesanan')
             ->where('status_transaksi', 'Pesanan Belum Dibayar')
-            ->where(function ($query) {
-                $query->whereDate('tanggal_pesanan', '=', Carbon::now()->addDay()->toDateString())
-                      ->orWhere('tanggal_pesanan', '<', Carbon::now()->toDateString());
-            })
+            ->whereDate('tanggal_pesanan', '<=', Carbon::now()->addDay()->toDateString())
             ->update(['status_transaksi' => 'Pesanan Dibatalkan']);
         
         $this->info('Status pesanan berhasil diupdate.');
