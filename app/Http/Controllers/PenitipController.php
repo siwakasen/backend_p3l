@@ -66,7 +66,10 @@ class PenitipController extends Controller
         try {
             //code...
             $searchkey = $request->query('query');
-            $data = Penitip::where('nama_penitip', 'like', '%'.$searchkey.'%')->get();
+            $data = Penitip::where('nama_penitip', 'like', '%'.$searchkey.'%')
+                            ->orWhere('no_hp', 'like', '%'.$searchkey.'%')
+                            ->orWhere('email', 'like', '%'.$searchkey.'%')
+                            ->get();
             if(count($data) == 0){
                 throw new \Exception();
             }

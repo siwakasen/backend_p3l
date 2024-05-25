@@ -66,7 +66,10 @@ class BahanBakuController extends Controller
         try {
             //code...
             $searchkey = $request->query('query');
-            $data = BahanBaku::where('nama_bahan_baku', 'like', "%$searchkey%")->get();
+            $data = BahanBaku::where('nama_bahan_baku', 'like', "%$searchkey%")
+                            ->orWhere('satuan', 'like', "%$searchkey%")
+                            ->orWhere('stok', 'like', "%$searchkey%")
+                            ->get();
             if(count($data) == 0){
                 throw new \Exception();
             }
@@ -179,7 +182,7 @@ class BahanBakuController extends Controller
             $bahan_baku->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil mengubah data bahan baku',
+                'message' => 'Berhasil menghapus data bahan baku',
                 'data' => $bahan_baku
             ],200);
             
