@@ -35,25 +35,25 @@ class DetailPesananSeeder extends Seeder
     {
         DB::table('detail_pesanan')->insert(
             [
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 1, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 2, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 3, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 4, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 5, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 4, 'id_hampers' => NULL, 'id_pesanan' => 6, 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 4, 'id_hampers' => NULL, 'id_pesanan' => 7, 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 8, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 9, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 18, 'id_hampers' => NULL, 'id_pesanan' => 10, 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 11, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 12, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 13, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 14, 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 15, 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 18, 'id_hampers' => NULL, 'id_pesanan' => 15, 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => 16, 'id_hampers' => NULL, 'id_pesanan' => 16, 'jumlah' => 1, 'subtotal' => 75000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => NULL, 'id_hampers' => 1, 'id_pesanan' => 17, 'jumlah' => 1, 'subtotal' => 65000,'created_at'=>now(),'updated_at'=>now()],
-                ['id_produk' => NULL, 'id_hampers' => 3, 'id_pesanan' => 18, 'jumlah' => 1, 'subtotal' => 350000,'created_at'=>now(),'updated_at'=>now()]
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 1,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 2,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 3,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 4,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 5,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 4, 'id_hampers' => NULL, 'id_pesanan' => 6,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 4, 'id_hampers' => NULL, 'id_pesanan' => 7,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 8,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 9, 'status_pesanan' =>'po','jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 18, 'id_hampers' => NULL, 'id_pesanan' => 10,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 11,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 12,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 13,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 10, 'id_hampers' => NULL, 'id_pesanan' => 14,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 200000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 15, 'id_hampers' => NULL, 'id_pesanan' => 15,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 100000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 18, 'id_hampers' => NULL, 'id_pesanan' => 15,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 300000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => 16, 'id_hampers' => NULL, 'id_pesanan' => 16,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 75000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => NULL, 'id_hampers' => 1, 'id_pesanan' => 17,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 65000,'created_at'=>now(),'updated_at'=>now()],
+                ['id_produk' => NULL, 'id_hampers' => 3, 'id_pesanan' => 18,'status_pesanan' =>'po', 'jumlah' => 1, 'subtotal' => 350000,'created_at'=>now(),'updated_at'=>now()]
             ]
         );
     }

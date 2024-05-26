@@ -152,9 +152,9 @@ class PesananController extends Controller
                 ], 400);
             }
             $pesanan = Pesanan::with(['detailPesanan' => function ($query) {
-                $query->select('id_pesanan', 'id_produk', 'id_hampers', 'jumlah', 'subtotal')
+                $query->select('id_pesanan', 'id_produk', 'id_hampers','status_pesanan', 'jumlah', 'subtotal')
                     ->with(['Produk' => function ($query) {
-                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_resep','id_penitip')
+                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_resep','id_penitip','stok_produk')
                         ->with(['Resep' => function ($query) {
                             $query->select('id_resep', 'nama_resep')
                             ->with(['DetailResep' => function ($query) {
@@ -166,7 +166,7 @@ class PesananController extends Controller
                         ->with(['DetailHampers' => function ($query) {
                             $query->select('id_hampers', 'id_produk', 'id_bahan_baku')
                             ->with(['Produk' => function ($query) {
-                                $query->select('id_produk', 'nama_produk',  'harga_produk','id_resep','id_penitip')
+                                $query->select('id_produk', 'nama_produk',  'harga_produk','id_resep','id_penitip','stok_produk')
                                 ->with(['Resep' => function ($query) {
                                     $query->select('id_resep', 'nama_resep')
                                     ->with(['DetailResep' => function ($query) {
@@ -194,48 +194,67 @@ class PesananController extends Controller
                     'status_transaksi' => 'Pesanan Diterima'
                 ]);
             }else{
-                //mengembalikan stok bahan baku produk penitip, pre-order toko, hampers
+                //mengembalikan stok bahan baku produk penitip, produk toko, hampers
                 foreach ($pesanan->detailPesanan as $detail) {
-                    
                     if($detail->id_produk!=null){
-                        //produk penitip keknya bakal dipindah ke pemesanan ready
+                        //produk penitip 
                         if($detail->Produk->id_penitip!=null){
                             $produk = Produk::where('id_produk', $detail->id_produk)->first();
                             $produk->update([
                                 'stok' => $produk->stok + $detail->jumlah
                             ]);
                         }else{
-                            foreach ($detail->Produk->Resep->DetailResep as $resep) {
-                                $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
-                                $jml_stok_kembali = $resep->jumlah * $detail->jumlah;
-                                $bahanBaku->update([
-                                    'stok' => $bahanBaku->stok + $jml_stok_kembali
+                            if($detail->status_pesanan == 'ready'){
+                                //pengembalian produk ready
+                                $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                                $produk->update([
+                                    'stok' => $produk->stok + $detail->jumlah
                                 ]);
-                            }
-                            $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)->first();
-                            $limitProduk->update([
-                                'limit' => $limitProduk->limit + $detail->jumlah
-                            ]);
-                        }
-                    }else{
-                        foreach ($detail->Hampers->DetailHampers as $detailHampers) {
-                            if($detailHampers->id_produk!=null){
-                                $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)->first();
-                                $limitProduk->update([
-                                    'limit' => $limitProduk->limit + $detail->jumlah
-                                ]);
-                                foreach ($detailHampers->Produk->Resep->detailResep as $resep) {
+                            }else{
+                                //pengembalian produk pre order
+                                foreach ($detail->Produk->Resep->DetailResep as $resep) {
                                     $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
                                     $jml_stok_kembali = $resep->jumlah * $detail->jumlah;
                                     $bahanBaku->update([
                                         'stok' => $bahanBaku->stok + $jml_stok_kembali
                                     ]);
                                 }
-                            }else{
+                                $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)->first();
+                                $limitProduk->update([
+                                    'limit' => $limitProduk->limit + $detail->jumlah
+                                ]);
+                            }
+                        }
+                    }else{
+                        foreach ($detail->Hampers->DetailHampers as $detailHampers) {
+                            //pengembalian hampers
+                            if($detailHampers->id_bahan_baku!=null){
+                                //pengembalian bahan baku card dan box
                                 $bahanBaku = BahanBaku::where('id_bahan_baku', $detailHampers->id_bahan_baku)->first();
                                 $bahanBaku->update([
                                     'stok' => $bahanBaku->stok + $detail->jumlah
                                 ]);
+                            }else{
+                                if($detail->status_pesanan == 'ready'){
+                                    //pengembalian hampers ready (jika kedua produk di dalam hampers ready)
+                                    $produk = Produk::where('id_produk', $detailHampers->id_produk)->first();
+                                    $produk->update([
+                                        'stok' => $produk->stok + $detail->jumlah
+                                    ]);
+                                }else{
+                                    //pengembalian hampers pre order
+                                    $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)->first();
+                                    $limitProduk->update([
+                                        'limit' => $limitProduk->limit + $detail->jumlah
+                                    ]);
+                                    foreach ($detailHampers->Produk->Resep->detailResep as $resep) {
+                                        $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
+                                        $jml_stok_kembali = $resep->jumlah * $detail->jumlah;
+                                        $bahanBaku->update([
+                                            'stok' => $bahanBaku->stok + $jml_stok_kembali
+                                        ]);
+                                    }
+                                }
                             }
                         }
                     }

@@ -14,6 +14,7 @@ class DetailPesanan extends Model
         'id_produk',
         'id_hampers',
         'id_pesanan',
+        'status_pesanan',
         'jumlah',
         'subtotal',
     ];

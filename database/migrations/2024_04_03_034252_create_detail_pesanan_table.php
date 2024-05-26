@@ -15,6 +15,7 @@ return new class extends Migration
             $table->foreignId('id_produk')->nullable()->references('id_produk')->on('produk')->restrictOnDelete()->restrictOnUpdate();
             $table->foreignId('id_hampers')->nullable()->references('id_hampers')->on('hampers')->restrictOnDelete()->restrictOnUpdate();
             $table->foreignId('id_pesanan')->references('id_pesanan')->on('pesanan')->restrictOnDelete()->restrictOnUpdate();
+            $table->string('status_pesanan', 100)->nullable();
             $table->integer('jumlah');
             $table->double('subtotal');
             $table->timestamps();
