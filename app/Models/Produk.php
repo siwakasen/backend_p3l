@@ -18,7 +18,7 @@ class Produk extends Model
         'nama_produk',
         'foto_produk',
         'deskripsi_produk',
-        'harga_produk',
+        'harga_produk', 
         'stok_produk',
         'status_produk'
     ];

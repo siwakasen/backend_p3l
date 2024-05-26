@@ -17,6 +17,8 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
+use App\Http\Controllers\PesananController;
+
 use App\Http\Middleware\TokenValidation;
 
 /*
@@ -216,7 +218,12 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('change-password')->group(function () {
         Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
+    
+    Route::prefix('/pesanan')->group(function () {
+        Route::get('/valid', [PesananController::class, 'getPesananValid'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::post('/confirm-pesanan/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
 
+    });
 
     /*
     =======================================================
@@ -263,8 +270,14 @@ Route::prefix('customer')->group(function () {
     Route::prefix('history')->group(function () {
         Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
     });
+
+    /*
+    =======================================================
+    |                       Pesanan                       |
+    =======================================================
+    */
     Route::prefix('pesanan')->group(function () {
-        Route::get('/', [CustomerController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
-        Route::post('/bayar/{id}', [CustomerController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/', [PesananController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/bayar/{id}', [PesananController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
     });
 });
