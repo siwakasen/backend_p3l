@@ -66,18 +66,18 @@ class CustomerController extends Controller
                 'tanggal_lahir' => $request->tanggal_lahir,
                 'no_hp' => $request->no_hp
             ]);
-            
+
             $id_token = $user->id_user;
 
-            if($user->id_user < 10){
-                $id_token = '0'.$user->id_user;
-            }else{
+            if ($user->id_user < 10) {
+                $id_token = '0' . $user->id_user;
+            } else {
                 $id_token = substr($user->id_user, 0, 2);
             }
 
-            $digitSec = substr($user->no_hp, -4).$id_token;
-            $token = $user->id_user.md5($user->email.$user->nama);
-            
+            $digitSec = substr($user->no_hp, -4) . $id_token;
+            $token = $user->id_user . md5($user->email . $user->nama);
+
             $data = [
                 'id_user' => $user->id_user,
                 'nama' => $user->nama,
@@ -143,7 +143,8 @@ class CustomerController extends Controller
         ], 400);
     }
 
-    public function verify(Request $request, $token) {
+    public function verify(Request $request, $token)
+    {
         $user = User::where('id_user', substr($token, 0, -32))->first();
 
         if ($user == null) {
@@ -155,13 +156,13 @@ class CustomerController extends Controller
 
         $id_token = $user->id_user;
 
-        if($user->id_user < 10){
-            $id_token = '0'.$user->id_user;
-        }else{
+        if ($user->id_user < 10) {
+            $id_token = '0' . $user->id_user;
+        } else {
             $id_token = substr($user->id_user, 0, 2);
         }
 
-        if($token == $user->id_user.md5($user->email.$user->nama) && $request->digit == substr($user->no_hp, -4).$id_token && $user->email_verified_at == null) {
+        if ($token == $user->id_user . md5($user->email . $user->nama) && $request->digit == substr($user->no_hp, -4) . $id_token && $user->email_verified_at == null) {
             $user->update([
                 'email_verified_at' => date('Y-m-d H:i:s')
             ]);
@@ -181,17 +182,18 @@ class CustomerController extends Controller
         ], 400);
     }
 
-    public function resendEmail(Request $request) {
+    public function resendEmail(Request $request)
+    {
         $user = User::where('id_user', substr($request->token, 0, -32))->first();
 
-        if($user == null) {
+        if ($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User not found.'
             ], 404);
         }
 
-        if($user->email_verified_at != null) {
+        if ($user->email_verified_at != null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Email already verified.'
@@ -200,9 +202,9 @@ class CustomerController extends Controller
 
         $id_token = $user->id_user;
 
-        if($user->id_user < 10){
-            $id_token = '0'.$user->id_user;
-        }else{
+        if ($user->id_user < 10) {
+            $id_token = '0' . $user->id_user;
+        } else {
             $id_token = substr($user->id_user, 0, 2);
         }
 
@@ -212,8 +214,8 @@ class CustomerController extends Controller
             'email' => $user->email,
             'tanggal_lahir' => $user->tanggal_lahir,
             'no_hp' => $user->no_hp,
-            'token' => $user->id_user.md5($user->email.$user->nama),
-            'digit' => substr($user->no_hp, -4).$id_token
+            'token' => $user->id_user . md5($user->email . $user->nama),
+            'digit' => substr($user->no_hp, -4) . $id_token
         ];
 
         Mail::to($user->email)->send(new MailVerification($data));
@@ -224,7 +226,8 @@ class CustomerController extends Controller
         ], 200);
     }
 
-    public function showData() {
+    public function showData()
+    {
         $user = User::find(Auth::user()->id_user);
 
         $user = [
@@ -239,7 +242,7 @@ class CustomerController extends Controller
             'role' => 'User'
         ];
 
-        if($user == null) {
+        if ($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'User not found.'
@@ -302,7 +305,7 @@ class CustomerController extends Controller
                         'status' => 'error',
                         'message' => 'Email already registered.'
                     ], 400);
-                }else{
+                } else {
                     User::where('id_user', $id)->update(
                         $request->only(['nama', 'email', 'tanggal_lahir', 'no_hp'])
                     );
@@ -320,7 +323,6 @@ class CustomerController extends Controller
                     'message' => 'User profile updated successfully.'
                 ], 200);
             }
-            
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -328,43 +330,44 @@ class CustomerController extends Controller
             ], 400);
         }
     }
-  
-    public function createToken(Request $request){
+
+    public function createToken(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email'
         ]);
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
                 'message' => $validator->errors()
             ], 400);
         }
         $user = User::where('email', $request->email)->first();
-        if($user == null) {
+        if ($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Email not registered.'
             ], 404);
         }
-        try{
-            $newToken=Str::random(100);
-            $exist=DB::table('password_reset_tokens')->where('email',$user->email)->first();
+        try {
+            $newToken = Str::random(100);
+            $exist = DB::table('password_reset_tokens')->where('email', $user->email)->first();
 
-            if($exist){
-                DB::table('password_reset_tokens')->where('email',$user->email)->Update([
-                    'token'=>$newToken,
-                    'created_at'=>now()
+            if ($exist) {
+                DB::table('password_reset_tokens')->where('email', $user->email)->Update([
+                    'token' => $newToken,
+                    'created_at' => now()
                 ]);
-            }else{
+            } else {
                 DB::table('password_reset_tokens')->Insert([
-                    'email'=>$user->email,
-                    'token'=>$newToken,
-                    'created_at'=>now()
+                    'email' => $user->email,
+                    'token' => $newToken,
+                    'created_at' => now()
                 ]);
             }
-            $details=[
-                'name'=>$user->nama,
-                'url'=>request()->ip().':'.request()->getPort().'/api/customer/reset-password/activate/'.$newToken,
+            $details = [
+                'name' => $user->nama,
+                'url' => request()->ip() . ':' . request()->getPort() . '/api/customer/reset-password/activate/' . $newToken,
             ];
 
             Mail::to($user->email)->send(new MailSend($details));
@@ -373,8 +376,7 @@ class CustomerController extends Controller
                 'status' => 'success',
                 'message' => 'Verification to reset password has been sent to your email.'
             ], 200);
-
-        }catch(\Exception $e){
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage()
@@ -382,27 +384,29 @@ class CustomerController extends Controller
         }
     }
 
-    public function activateToken(String $token){
-        $verify_token = DB::table('password_reset_tokens')->where('token',$token)->first();
-        if(!$verify_token || $verify_token->token != $token ){
+    public function activateToken(String $token)
+    {
+        $verify_token = DB::table('password_reset_tokens')->where('token', $token)->first();
+        if (!$verify_token || $verify_token->token != $token) {
             return view('verificationFailed');
         }
-        DB::table('password_reset_tokens')->where('token',$token)->update([ 
-            'is_active'=>true
+        DB::table('password_reset_tokens')->where('token', $token)->update([
+            'is_active' => true
         ]);
-        $link = 'http://127.0.0.1:3000/forgot-password/change-password?token='.$token.'&email='.$verify_token->email;
+        $link = 'http://127.0.0.1:3000/forgot-password/change-password?token=' . $token . '&email=' . $verify_token->email;
         return view('verificationSuccess', compact('link'));
     }
-    
-    public function validateToken(String $token){
-        $verify_token = DB::table('password_reset_tokens')->where('token',$token)->first();
-        if(!$verify_token || $verify_token->token != $token ){
+
+    public function validateToken(String $token)
+    {
+        $verify_token = DB::table('password_reset_tokens')->where('token', $token)->first();
+        if (!$verify_token || $verify_token->token != $token) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Invalid token'
             ], 404);
         }
-        if(!$verify_token->is_active){
+        if (!$verify_token->is_active) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Token is not active'
@@ -414,14 +418,15 @@ class CustomerController extends Controller
         ], 200);
     }
 
-    public function resetPassword(Request $request){ 
+    public function resetPassword(Request $request)
+    {
         try {
             $validator = Validator::make($request->all(), [
                 'password' => 'required|min:8',
                 'confirm_password' => 'required|same:password',
             ]);
-            
-            if($validator->fails()) {
+
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => $validator->errors()
@@ -429,19 +434,19 @@ class CustomerController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
-            if($user == null) {
+            if ($user == null) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Email not registered.'
                 ], 404);
             }
-            $token = DB::table('password_reset_tokens')->where('email',$user->email)->first();
-            if(!$token){
+            $token = DB::table('password_reset_tokens')->where('email', $user->email)->first();
+            if (!$token) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Invalid token'
                 ], 404);
-            }else if(!$token->is_active){
+            } else if (!$token->is_active) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Token is not active'
@@ -457,8 +462,7 @@ class CustomerController extends Controller
                 'status' => 'success',
                 'message' => 'Password updated successfully.'
             ], 200);
-
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error: ' . $e->getMessage()
@@ -466,10 +470,11 @@ class CustomerController extends Controller
         }
     }
 
-    public function historyTransaction() {
+    public function historyTransaction()
+    {
         $user = User::find(Auth::user()->id_user);
 
-        if($user == null) {
+        if ($user == null) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized'
@@ -478,11 +483,44 @@ class CustomerController extends Controller
         try {
             $id = Auth::user()->id_user;
             $data = Pesanan::where('id_user', $id)
-            ->where(function($query){
-                $query->where('status_transaksi', 'Pesanan Sudah Selesai')
-                ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
-            })
-            ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
+                ->where(function ($query) {
+                    $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                        ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
+                })
+                ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction history fetched successfully.',
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function getHistoryPesananByStatus(Request $request)
+    {
+        $user = User::find(Auth::user()->id_user);
+        if ($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+        if (!$request->has('status')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Status is required.'
+            ], 400);
+        }
+        try {
+            $id = Auth::user()->id_user;
+            $data = Pesanan::where('id_user', $id)
+                ->where('status_transaksi', $request->status)->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
 
             return response()->json([
                 'status' => 'success',

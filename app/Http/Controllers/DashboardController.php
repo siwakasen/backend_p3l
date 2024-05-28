@@ -187,4 +187,48 @@ class DashboardController extends Controller
             ],
         ]);
     }
+
+    public function getNotifikasi() {
+        $pesanan = Pesanan::where(function($query) {
+            $query->where(function($subQuery) {
+            $subQuery->where('status_transaksi', 'Menunggu Konfirmasi Pesanan')
+                        ->where('metode_pengiriman', 'LIKE', 'Pick Up %');
+            })->orWhere('status_transaksi', 'Menunggu Konfirmasi Pembayaran');
+        })->get()->load('User')->load('DetailPesanan');
+
+        $data = collect();
+
+        foreach ($pesanan as $item) {
+            $title = '';
+            $message = '';
+
+            if ($item->status_transaksi === 'Menunggu Konfirmasi Pesanan') {
+                $title = 'Pesanan Baru';
+                $message = 'Ada pesanan baru yang menunggu konfirmasi';
+            } else if ($item->status_transaksi === 'Menunggu Konfirmasi Pembayaran') {
+                $title = 'Pembayaran Belum Dikonfirmasi';
+                $message = 'Ada pesanan yang belum dibayar';
+            }
+
+            $data->push([
+                'title' => $title,
+                'message' => $message,
+                'user' => $item->User,
+                'id_pesanan' => $item->id_pesanan,
+                'link' => '/administrator/pesanan-masuk/'
+            ]);
+        }
+
+        if ($data->count() === 0) {
+            return response()->json([
+                'message' => 'No notifikasi data found',
+                'data' => []
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Successfully fetch notifikasi data',
+            'data' => $data
+        ]);
+    }
 }

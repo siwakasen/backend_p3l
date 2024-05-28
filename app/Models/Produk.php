@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -36,5 +37,22 @@ class Produk extends Model
     public function Resep()
     {
         return $this->belongsTo(Resep::class, 'id_resep', 'id_resep');
+    }
+
+    public function limitProduk()
+    {
+        return $this->hasMany(LimitProduk::class, 'id_produk', 'id_produk');
+    }
+
+    public function limitProdukHariIni()
+    {
+        return $this->hasOne(LimitProduk::class, 'id_produk')
+            ->whereDate('tanggal', Carbon::now()->addDays(2)->format('Y-m-d'));
+    }
+
+    public function limitByDate($date)
+    {
+        return $this->hasOne(LimitProduk::class, 'id_produk')
+            ->whereDate('tanggal', $date);
     }
 }

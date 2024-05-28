@@ -19,9 +19,9 @@ class Hampers extends Model
         'status_hampers'
     ];
 
-    public function DetailPesanan()
+    public function DetailHampers()
     {
-        return $this->hasMany(DetailPesanan::class, 'id_hampers', 'id_hampers');
+        return $this->hasMany(DetailHampers::class, 'id_hampers', 'id_hampers');
     }
     public function DetailHampers()
     {
