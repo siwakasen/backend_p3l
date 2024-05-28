@@ -221,7 +221,8 @@ Route::prefix('administrator')->group(function () {
     
     Route::prefix('/pesanan')->group(function () {
         Route::get('/valid', [PesananController::class, 'getPesananValid'])->middleware('auth:sanctum', 'ability:manajer-operasional');
-        Route::post('/confirm-pesanan/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/konfirmasi/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/bahan-baku-kurang', [PesananController::class, 'bahanBakuKurang'])->middleware('auth:sanctum', 'ability:manajer-operasional');
 
     });
 
@@ -277,7 +278,7 @@ Route::prefix('customer')->group(function () {
     =======================================================
     */
     Route::prefix('pesanan')->group(function () {
-        Route::get('/', [PesananController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/belum-bayar', [PesananController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
         Route::post('/bayar/{id}', [PesananController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
     });
 });

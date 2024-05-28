@@ -23,9 +23,9 @@ class PesananController extends Controller
             $pesanan = Pesanan::with(['detailPesanan' => function ($query) {
                 $query->select('id_pesanan', 'id_produk', 'id_hampers', 'jumlah', 'subtotal')
                     ->with(['Produk' => function ($query) {
-                        $query->select('id_produk', 'nama_produk',  'harga_produk');
+                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_kategori');
                     }, 'Hampers' => function ($query) {
-                        $query->select('id_hampers', 'nama_hampers', 'harga_hampers');
+                        $query->select('id_hampers', 'nama_hampers', 'harga_hampers',);
                     }]);
                 }])
                 ->where('id_user', $id)
@@ -53,14 +53,11 @@ class PesananController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'bukti_pembayaran' => 'required'
-            ],
-            [
-                'bukti_pembayaran.required' => 'Bukti pembayaran harus diisi!'
             ]);
             if($validator->fails()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => $validator->errors()
+                    'message' => 'Bukti pembayaran harus diisi!'
                 ], 400);
             }
 
@@ -74,7 +71,7 @@ class PesananController extends Controller
                 ]);
                 return response()->json([
                     'status' => false,
-                    'message' => 'Pesanan sudah meewlati batas waktu pembayaran'
+                    'message' => 'Pesanan sudah melewati batas waktu pembayaran'
                 ], 400);
             }
             $userId = auth()->user()->id;
@@ -139,11 +136,11 @@ class PesananController extends Controller
     public function confirmPesanan($id,Request $request){
         try {
             $validator = Validator::make($request->all(), [
-                'status' => 'required|in:diterima,ditolak'
+                'status_transaksi' => 'required|in:diterima,ditolak'
             ],
             [
-                'status.required' => 'Status konfirmasi harus diisi!',
-                'status.in' => 'Status konfirmasi harus `diterima` atau `ditolak`!',
+                'status_transaksi.required' => 'Status konfirmasi harus diisi!',
+                'status_transaksi.in' => 'Status konfirmasi harus `diterima` atau `ditolak`!',
             ]);
             if($validator->fails()) {
                 return response()->json([
@@ -183,83 +180,104 @@ class PesananController extends Controller
             if($pesanan == null){
                 throw new \Exception();
             }
-            if($request->status == 'diterima'){
+            if($request->status_transaksi == 'diterima'){
+                
                 if($pesanan->poin_didapat!=null){
                     $user = User::where('id_user', $pesanan->id_user)->first();
                     $user->update([
                         'poin' => $user->poin + $pesanan->poin_didapat
                     ]);
                 }
-                $pesanan->update([
-                    'status_transaksi' => 'Pesanan Diterima'
-                ]);
-            }else{
-                //mengembalikan stok bahan baku produk penitip, produk toko, hampers
+
                 foreach ($pesanan->detailPesanan as $detail) {
                     if($detail->id_produk!=null){
-                        //produk penitip 
                         if($detail->Produk->id_penitip!=null){
                             $produk = Produk::where('id_produk', $detail->id_produk)->first();
                             $produk->update([
-                                'stok' => $produk->stok + $detail->jumlah
+                                'stok_produk' => $produk->stok - $detail->jumlah
                             ]);
                         }else{
-                            if($detail->status_pesanan == 'ready'){
-                                //pengembalian produk ready
-                                $produk = Produk::where('id_produk', $detail->id_produk)->first();
-                                $produk->update([
-                                    'stok' => $produk->stok + $detail->jumlah
-                                ]);
-                            }else{
-                                //pengembalian produk pre order
-                                foreach ($detail->Produk->Resep->DetailResep as $resep) {
-                                    $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
-                                    $jml_stok_kembali = $resep->jumlah * $detail->jumlah;
-                                    $bahanBaku->update([
-                                        'stok' => $bahanBaku->stok + $jml_stok_kembali
-                                    ]);
-                                }
-                                $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)->first();
-                                $limitProduk->update([
-                                    'limit' => $limitProduk->limit + $detail->jumlah
+                            foreach ($detail->Produk->Resep->DetailResep as $resep) {
+                                $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
+                                $jml_stok = $resep->jumlah * $detail->jumlah;
+                                $bahanBaku->update([
+                                    'stok' => $bahanBaku->stok - $jml_stok
                                 ]);
                             }
                         }
                     }else{
                         foreach ($detail->Hampers->DetailHampers as $detailHampers) {
-                            //pengembalian hampers
-                            if($detailHampers->id_bahan_baku!=null){
-                                //pengembalian bahan baku card dan box
+                            //pengurangan bahan baku pada hampers
+                            if($detailHampers->id_produk!=null){
+                                foreach ($detailHampers->Produk->Resep->detailResep as $resep) {
+                                    $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
+                                    $jml_stok = $resep->jumlah * $detail->jumlah;
+                                    $bahanBaku->update([
+                                        'stok' => $bahanBaku->stok - $jml_stok
+                                    ]);
+                                }
+                            }else{
                                 $bahanBaku = BahanBaku::where('id_bahan_baku', $detailHampers->id_bahan_baku)->first();
                                 $bahanBaku->update([
-                                    'stok' => $bahanBaku->stok + $detail->jumlah
+                                    'stok' => $bahanBaku->stok - $detail->jumlah
                                 ]);
-                            }else{
-                                if($detail->status_pesanan == 'ready'){
-                                    //pengembalian hampers ready (jika kedua produk di dalam hampers ready)
-                                    $produk = Produk::where('id_produk', $detailHampers->id_produk)->first();
+                            }
+                        }
+                    }
+                    }
+                $pesanan->update([
+                    'status_transaksi' => 'Pesanan Diterima'
+                ]);
+            }else{
+                //mengembalikan stok ready produk penitip, produk toko atau kuota produk toko
+                foreach ($pesanan->detailPesanan as $detail) {
+                    if($detail->id_produk!=null){
+                        //produk penitip 
+                        if($detail->Produk->id_penitip!=null){
+                            //pengembalian produk penitip
+                            $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                            if($produk!=null){
+                                $produk->update([
+                                    'stok_produk' => $produk->stok + $detail->jumlah
+                                ]);
+                            }
+                        }else{
+                            if($detail->status_pesanan == 'ready'){
+                                //pengembalian produk ready
+                                $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                                if($produk!=null){
                                     $produk->update([
-                                        'stok' => $produk->stok + $detail->jumlah
+                                        'stok_produk' => $produk->stok + $detail->jumlah
                                     ]);
-                                }else{
-                                    //pengembalian hampers pre order
-                                    $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)->first();
+                                }
+                            }else{
+                                //pengembalian produk pre order
+                                $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)
+                                ->where('tanggal',$pesanan->tanggal_diambil)
+                                ->first();
+                                if($limitProduk!=null){
                                     $limitProduk->update([
                                         'limit' => $limitProduk->limit + $detail->jumlah
                                     ]);
-                                    foreach ($detailHampers->Produk->Resep->detailResep as $resep) {
-                                        $bahanBaku = BahanBaku::where('id_bahan_baku', $resep->id_bahan_baku)->first();
-                                        $jml_stok_kembali = $resep->jumlah * $detail->jumlah;
-                                        $bahanBaku->update([
-                                            'stok' => $bahanBaku->stok + $jml_stok_kembali
-                                        ]);
-                                    }
+                                }
+                            }
+                        }
+                    }else{
+                        foreach ($detail->Hampers->DetailHampers as $detailHampers) {
+                            if($detailHampers->id_produk!=null){
+                                //pengembalian produk pada hampers
+                                $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)
+                                ->where('tanggal',$pesanan->tanggal_diambil)
+                                ->first();
+                                if($limitProduk!=null){
+                                    $limitProduk->update([
+                                        'limit' => $limitProduk->limit + $detail->jumlah
+                                    ]);
                                 }
                             }
                         }
                     }
                 }
-
                 //menambah saldo customer
                 $user = User::where('id_user', $pesanan->id_user)->first();
                 $user->update([
@@ -273,11 +291,28 @@ class PesananController extends Controller
                 'status' => true,
                 'message' => $pesanan->status_transaksi,
                 'data' => $pesanan
-            ]);
+            ],200);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => 'Pesanan not found',
+                'error' => $th->getMessage()
+            ], 404);
+        }
+    }
+    public function bahanBakuKurang(){
+        try {
+            $bahanBaku = BahanBaku::where('stok','<',0)->get();
+            return response()->json([
+                'status' => true,
+                'message' => 'Success get bahan baku kurang',
+                'data' => $bahanBaku
+            ],200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Bahan baku not found',
+                'data' => [],
                 'error' => $th->getMessage()
             ], 404);
         }
