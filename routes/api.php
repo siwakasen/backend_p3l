@@ -17,6 +17,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
+use App\Http\Controllers\PesananController;
 use App\Http\Middleware\TokenValidation;
 
 /*
@@ -47,6 +48,7 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::get('/', [DashboardController::class, 'index'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
+    Route::get('/notifikasi', [DashboardController::class, 'getNotifikasi'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     /*
     =======================================================
     |                   Roles Management                  |
@@ -113,6 +115,17 @@ Route::prefix('administrator')->group(function () {
         Route::get('/', [ProdukController::class, 'getAllProduk'])->middleware('auth:sanctum', 'ability:admin');
     });
 
+    /*
+    =======================================================
+    |                 Pesanan Masuk Management            |
+    =======================================================
+    */
+    Route::prefix('pesanan-masuk')->group(function () {
+        Route::get('/', [PesananController::class, 'getAllPesananMasuk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/{id}', [PesananController::class, 'getPesanan'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/updateInputJarak/{id}', [PesananController::class, 'updateOngkir'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/updateTotalBayar/{id}', [PesananController::class, 'updateTotalBayar'])->middleware('auth:sanctum', 'ability:admin');
+    });
 
     /*
     =======================================================
