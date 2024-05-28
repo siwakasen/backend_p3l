@@ -290,4 +290,5 @@ class PesananController extends Controller
             'message' => 'Successfully update total bayar data.',
             'data' => $pesanan
         ], 200);
+    }
 }
