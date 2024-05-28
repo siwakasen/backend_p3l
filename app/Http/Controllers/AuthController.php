@@ -58,7 +58,7 @@ class AuthController extends Controller
                     'key' => 'email_not_verified',
                     'message' => 'Email not verified',
                     'data' => null,
-                    'token' => $user->id_user.md5($user->email.$user->nama),
+                    'token' => $user->id_user . md5($user->email . $user->nama),
                 ], 401);
             }
 
@@ -96,12 +96,12 @@ class AuthController extends Controller
     public function checkToken()
     {
         $user = auth()->user();
-        if(!$user){
+        if (!$user) {
             return response()->json([
                 'status' => true,
                 'message' => 'Token invalid',
                 'data' => $user,
-            ],400);
+            ], 400);
         }
 
         if (is_null($user['id_karyawan'])) {
@@ -116,7 +116,6 @@ class AuthController extends Controller
                 'email_verified_at' => $user->email_verified_at,
                 'role' => 'User'
             ];
-
         } else {
             $payload = [
                 'id_karyawan' => $user->id_karyawan,
@@ -133,7 +132,7 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Token valid',
             'data' => $payload,
-        ],200);
+        ], 200);
     }
 
     /*

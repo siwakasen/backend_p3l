@@ -52,6 +52,31 @@ class LimitProdukController extends Controller
         ]);
     }
 
+    public function searchLimit(Request $request)
+    {
+        if ($request->has('date')) {
+            $limitProduk = LimitProduk::where('tanggal', $request->date)->get();
+            if (!$limitProduk) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data limit produk tidak ditemukan',
+                    'data' => null
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data limit produk berhasil diambil',
+                'data' => $limitProduk
+            ]);
+        }
+        return response()->json([
+            'status' => false,
+            'message' => 'Invalid request',
+            'data' => null
+        ], 400);
+    }
+
     public function updateLimitProduk(Request $request, String $id)
     {
         $data = $request->all();

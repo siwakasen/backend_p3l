@@ -16,6 +16,7 @@ class DetailPesanan extends Model
         'id_pesanan',
         'jumlah',
         'subtotal',
+        'status_pesanan'
     ];
 
     public function Produk()

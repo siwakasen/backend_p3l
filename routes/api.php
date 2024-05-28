@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlamatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RolesController;
@@ -110,9 +111,9 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [ProdukController::class, 'updateProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [ProdukController::class, 'insertProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [ProdukController::class, 'deleteProduk'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/search', [ProdukController::class, 'searchProduk'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/{id}', [ProdukController::class, 'getProduk'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/', [ProdukController::class, 'getAllProduk'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/search', [ProdukController::class, 'searchProduk']);
+        Route::get('/{id}', [ProdukController::class, 'getProduk']);
+        Route::get('/', [ProdukController::class, 'getAllProduk']);
     });
 
     /*
@@ -133,9 +134,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('hampers')->group(function () {
-        Route::get('/search', [HampersController::class, 'searchHampers'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/', [HampersController::class, 'getAllHampers'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/{id}', [HampersController::class, 'getHampers'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/search', [HampersController::class, 'searchHampers']);
+        Route::get('/', [HampersController::class, 'getAllHampers']);
+        Route::get('/{id}', [HampersController::class, 'getHampers']);
         Route::put('/{id}', [HampersController::class, 'updateHampers'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [HampersController::class, 'insertHampers'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [HampersController::class, 'deleteHampers'])->middleware('auth:sanctum', 'ability:admin');
@@ -147,8 +148,9 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('limit-produk')->group(function () {
-        Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
-        Route::get('/', [LimitProdukController::class, 'getAllLimitProduct'])->middleware('auth:sanctum', 'ability:admin');
+        Route::get('/search', [LimitProdukController::class, 'searchLimit']);
+        Route::get('/{id}', [LimitProdukController::class, 'getLimitProduk']);
+        Route::get('/', [LimitProdukController::class, 'getAllLimitProduct']);
         Route::put('/{id}', [LimitProdukController::class, 'updateLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::post('/', [LimitProdukController::class, 'insertLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [LimitProdukController::class, 'deleteLimitProduk'])->middleware('auth:sanctum', 'ability:admin');
@@ -237,8 +239,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('kategori')->group(function () {
-        Route::get('/', [KategoriController::class, 'getAllKategori'])->middleware('auth:sanctum', 'ability:admin,user');
-        Route::get('/{id}', [KategoriController::class, 'getKategori'])->middleware('auth:sanctum', 'ability:admin,user');
+        Route::get('/', [KategoriController::class, 'getAllKategori']);
+        Route::get('/{id}', [KategoriController::class, 'getKategori']);
         Route::post('/', [KategoriController::class, 'insertKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [KategoriController::class, 'updateKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [KategoriController::class, 'deleteKategori'])->middleware('auth:sanctum', 'ability:admin');
@@ -275,5 +277,34 @@ Route::prefix('customer')->group(function () {
     */
     Route::prefix('history')->group(function () {
         Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/search', [CustomerController::class, 'getHistoryPesananByStatus'])->middleware('auth:sanctum', 'ability:user');
+    });
+
+    /*
+    =======================================================
+    |                       Alamat                        |
+    =======================================================
+    */
+    Route::prefix('alamat')->group(function () {
+        Route::get('/{id}', [AlamatController::class, 'getAlamatById']);
+    });
+
+    /*
+    =======================================================
+    |                         Cart                        |
+    =======================================================
+    */
+    Route::prefix('cart')->group(function () {
+        Route::get('/', [PesananController::class, 'getCart'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/add', [PesananController::class, 'addToCart'])->middleware('auth:sanctum', 'ability:user');
+    });
+
+    /*
+    =======================================================
+    |                       Pesanan                       |
+    =======================================================
+    */
+    Route::prefix('pesanan')->group(function () {
+        Route::post('/checkout', [PesananController::class, 'checkout'])->middleware('auth:sanctum', 'ability:user');
     });
 });
