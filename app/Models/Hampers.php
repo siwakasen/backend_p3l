@@ -23,8 +23,4 @@ class Hampers extends Model
     {
         return $this->hasMany(DetailHampers::class, 'id_hampers', 'id_hampers');
     }
-    public function DetailHampers()
-    {
-        return $this->hasMany(DetailHampers::class, 'id_hampers', 'id_hampers');
-    }
 }
