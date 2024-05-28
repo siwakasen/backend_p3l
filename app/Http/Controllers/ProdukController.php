@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DetailHampers;
 use App\Models\Produk;
 use App\Models\Resep;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -56,7 +57,7 @@ class ProdukController extends Controller
 
     public function getAllProduk()
     {
-        $produk = Produk::all();
+        $produk = Produk::with(['limitProdukHariIni:id_limit_produk,id_produk,limit,tanggal'])->get();
 
         if (!$produk) {
             return response()->json([
@@ -76,7 +77,7 @@ class ProdukController extends Controller
     public function searchProduk(Request $request)
     {
         $keyword = $request->query('query');
-        $produks = Produk::where('nama_produk', 'like', "%$keyword%")->get();
+        $produks = Produk::with(['limitProdukHariIni:id_limit_produk,id_produk,limit,tanggal'])->where('nama_produk', 'like', "%$keyword%")->get();
         if (count($produks) == 0) {
             return response()->json([
                 'status' => false,

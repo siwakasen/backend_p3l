@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailHampers;
 use App\Models\Hampers;
-use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -70,18 +69,7 @@ class HampersController extends Controller
 
     public function getHampers(String $id)
     {
-        $hampers = Hampers::find($id);
-        $detail_hampers = DetailHampers::where('id_hampers', $id)->get();
-        $bahan_baku = [];
-        $produk = [];
-        foreach ($detail_hampers as $detail) {
-            if (!$detail->BahanBaku) {
-                $produk[] = $detail->Produk;
-            }
-            if (!$detail->Produk) {
-                $bahan_baku[] = $detail->BahanBaku;
-            }
-        }
+        $hampers = Hampers::with('DetailHampers.Produk.limitProduk')->find($id);
 
         if (!$hampers) {
             return response()->json([
@@ -90,11 +78,6 @@ class HampersController extends Controller
                 'data' => null
             ], 404);
         }
-
-        $hampers['detail'] = [
-            'produk' => $produk,
-            'bahan_baku' => $bahan_baku,
-        ];
 
         return response()->json([
             'status' => true,
@@ -261,7 +244,18 @@ class HampersController extends Controller
     public function searchHampers(Request $request)
     {
         $keyword = $request->query('query');
-        $hampers = Hampers::where('nama_hampers', 'like', "%$keyword%")->get();
+        $date = $request->query('date');
+
+        if (is_null($date)) {
+            $hampers = Hampers::with('DetailHampers.Produk')->where('nama_hampers', 'like', "%$keyword%")->get();
+        } else {
+            $hampers = Hampers::with(['detailHampers.produk' => function ($query) use ($date) {
+                $query->with(['limitProduk' => function ($query) use ($date) {
+                    $query->whereDate('tanggal', $date);
+                }]);
+            }])->where('nama_hampers', 'like', "%$keyword%")->get();
+        }
+
         if (count($hampers) == 0) {
             return response()->json([
                 'status' => false,
@@ -270,10 +264,47 @@ class HampersController extends Controller
             ], 404);
         }
 
+        $detailHampers = $hampers->first();
+        $detailHampers = $detailHampers['detailHampers'];
+        $produkHampers = $detailHampers->filter(function ($detail) {
+            return $detail->produk;
+        });
+
+        $isNotProdukTititpan = $produkHampers->every(function ($item) {
+            return $item->produk->kategori->id_kategori != 4;
+        });
+
+        if (!$isNotProdukTititpan) {
+            $id_produk = $detailHampers->filter(function ($detail) {
+                return $detail->produk && $detail->produk->id_kategori != 4;
+            });
+            $hampers->first()->id_produk = $id_produk->first()->produk->id_produk;
+        } else {
+            $lowestLimit = PHP_INT_MAX;
+            $productIdWithLowestLimit = null;
+
+            foreach ($produkHampers as $detail) {
+                $produk = $detail['produk'];
+                $limitProduk = $produk['limitProduk'];
+                $currentLimit = 0;
+
+                if (count($limitProduk) > 0) {
+                    $currentLimit = $limitProduk[0]['limit'];
+                }
+
+                if ($currentLimit < $lowestLimit) {
+
+                    $lowestLimit = $currentLimit;
+                    $productIdWithLowestLimit = $produk['id_produk'];
+                }
+            }
+            $hampers->first()->id_produk =  $productIdWithLowestLimit;
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Success search hampers',
-            'data' => $hampers
+            'data' => $hampers,
         ]);
     }
 }
