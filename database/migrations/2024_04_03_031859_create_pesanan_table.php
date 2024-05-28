@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('pesanan', function (Blueprint $table) {
             $table->id('id_pesanan');
             $table->foreignId('id_user')->references('id_user')->on('users')->restrictOnDelete()->restrictOnUpdate();
-            $table->string('metode_pemesanan', 100);
-            $table->string('metode_pengiriman', 100);
+            $table->string('no_nota', 100)->nullable();
+            $table->string('metode_pemesanan', 100)->nullable();
+            $table->string('metode_pengiriman', 100)->nullable();
             $table->string('bukti_pembayaran')->nullable();
             $table->double('ongkir')->nullable();
             $table->double('total_harga')->nullable();
