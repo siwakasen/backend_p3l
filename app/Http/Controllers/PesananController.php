@@ -242,7 +242,7 @@ class PesananController extends Controller
                                 ]);
                             }
                         }else{
-                            if($detail->status_pesanan == 'ready'){
+                            if($detail->status_pesanan == 'Ready'){
                                 //pengembalian produk ready
                                 $produk = Produk::where('id_produk', $detail->id_produk)->first();
                                 if($produk!=null){
