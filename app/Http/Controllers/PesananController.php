@@ -29,7 +29,7 @@ class PesananController extends Controller
                     }]);
                 }])
                 ->where('id_user', $id)
-                ->where('status_transaksi', 'Pesanan Belum Dibayar')
+                ->where('status_transaksi', 'Menunggu Pembayaran')
                 ->get();
             if (count($pesanan) == 0) {
                 throw new \Exception();
@@ -61,7 +61,7 @@ class PesananController extends Controller
                 ], 400);
             }
 
-            $pesanan = Pesanan::where('id_pesanan', $id)->where('status_transaksi', 'Pesanan Belum Dibayar')->first();
+            $pesanan = Pesanan::where('id_pesanan', $id)->where('status_transaksi', 'Menunggu Pembayaran')->first();
             if($pesanan == null){
                 throw new \Exception();
             }
