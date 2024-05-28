@@ -231,7 +231,13 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('change-password')->group(function () {
         Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
+    
+    Route::prefix('/pesanan')->group(function () {
+        Route::get('/valid', [PesananController::class, 'getPesananValid'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::put('/konfirmasi/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
+        Route::get('/bahan-baku-kurang', [PesananController::class, 'bahanBakuKurang'])->middleware('auth:sanctum', 'ability:manajer-operasional');
 
+    });
 
     /*
     =======================================================
@@ -306,5 +312,15 @@ Route::prefix('customer')->group(function () {
     */
     Route::prefix('pesanan')->group(function () {
         Route::post('/checkout', [PesananController::class, 'checkout'])->middleware('auth:sanctum', 'ability:user');
+    });
+
+    /*
+    =======================================================
+    |                       Pesanan                       |
+    =======================================================
+    */
+    Route::prefix('pesanan')->group(function () {
+        Route::get('/belum-bayar', [PesananController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
+        Route::post('/bayar/{id}', [PesananController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
     });
 });

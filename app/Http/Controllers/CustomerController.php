@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use App\Mail\MailSend;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -602,4 +603,5 @@ class CustomerController extends Controller
             ], 404);
         }
     }
+
 }
