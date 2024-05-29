@@ -83,7 +83,7 @@ class PesananController extends Controller
             $path = $request->file('bukti_pembayaran')->storeAs('bukti_pembayaran', $hash . '.' . $extension, 'public');
             
             $pesanan->update([
-                'status_transaksi' => 'Pesanan Sudah Dibayar',
+                'status_transaksi' => 'Menunggu Konfirmasi Pembayaran',
                 'tanggal_pembayaran' => now(),
                 'bukti_pembayaran' => $hash . '.' . $extension
             ]);
@@ -516,7 +516,7 @@ class PesananController extends Controller
             'data' => Pesanan::where(function($query) {
                 $query->where(function($subQuery) {
                     $subQuery->where('status_transaksi', 'Menunggu Konfirmasi Pesanan')
-                             ->where('metode_pengiriman', 'LIKE', 'Pick Up %');
+                             ->where('metode_pengiriman', 'Pengantaran Kurir Toko');
                     })->orWhere('status_transaksi', 'Menunggu Konfirmasi Pembayaran');
                 })
                 ->get()
