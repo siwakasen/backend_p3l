@@ -143,6 +143,7 @@ class PesananController extends Controller
                     }]);
                 }])
                 ->where('status_transaksi', 'Pembayaran Valid')
+                ->orderBy('tgl_transaksi', 'dsc')
                 ->get();
             if (count($pesanan) == 0) {
                 throw new \Exception();
