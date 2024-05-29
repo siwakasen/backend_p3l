@@ -19,7 +19,7 @@ class Produk extends Model
         'nama_produk',
         'foto_produk',
         'deskripsi_produk',
-        'harga_produk', 
+        'harga_produk',
         'stok_produk',
         'status_produk'
     ];
@@ -47,7 +47,7 @@ class Produk extends Model
     public function limitProdukHariIni()
     {
         return $this->hasOne(LimitProduk::class, 'id_produk')
-            ->whereDate('tanggal', Carbon::now()->addDays(2)->format('Y-m-d'));
+            ->whereDate('tanggal', Carbon::now('Asia/Jakarta')->addDays(2)->format('Y-m-d'));
     }
 
     public function limitByDate($date)
