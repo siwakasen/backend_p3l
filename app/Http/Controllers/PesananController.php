@@ -629,7 +629,7 @@ class PesananController extends Controller
 
         $total_bayar = $request->total_bayar;
         if ($total_bayar > $pesanan->total_harga) {
-            $tip = $total_bayar - $pesanan->total_harga;
+            $tip = $total_bayar - ($pesanan->total_harga + $pesanan->ongkir);
             $pesanan->tip = $tip;
         }
 
