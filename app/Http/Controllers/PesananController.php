@@ -26,9 +26,9 @@ class PesananController extends Controller
             $pesanan = Pesanan::with(['detailPesanan' => function ($query) {
                 $query->select('id_pesanan', 'id_produk', 'id_hampers', 'jumlah', 'subtotal')
                     ->with(['Produk' => function ($query) {
-                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_kategori');
+                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_kategori','foto_produk','deskripsi_produk',);
                     }, 'Hampers' => function ($query) {
-                        $query->select('id_hampers', 'nama_hampers', 'harga_hampers',);
+                        $query->select('id_hampers', 'nama_hampers', 'harga_hampers','foto_hampers','deskripsi_hampers');
                     }]);
                 }])
                 ->where('id_user', $id)
@@ -64,19 +64,60 @@ class PesananController extends Controller
                 ], 400);
             }
 
-            $pesanan = Pesanan::where('id_pesanan', $id)->where('status_transaksi', 'Menunggu Pembayaran')->first();
+            $pesanan = Pesanan::with(['detailPesanan' => function ($query) {
+                $query->select('id_pesanan', 'id_produk', 'id_hampers', 'jumlah', 'subtotal','status_pesanan')
+                    ->with(['Produk' => function ($query) {
+                        $query->select('id_produk', 'nama_produk',  'harga_produk','id_kategori','id_penitip');
+                    }, 'Hampers' => function ($query) {
+                        $query->select('id_hampers', 'nama_hampers', 'harga_hampers');
+                    }]);
+            }])
+            ->where('id_pesanan', $id)
+            ->where('status_transaksi', 'Menunggu Pembayaran')
+            ->first();
+            
             if($pesanan == null){
                 throw new \Exception();
             }
-            if($pesanan->tanggal_pesanan <= Carbon::now()->addDay()->toDateTimeString()){
-                $pesanan->update([
-                    'status_transaksi' => 'Pesanan Dibatalkan'
-                ]);
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Pesanan sudah melewati batas waktu pembayaran'
-                ], 400);
+            $isPreOrder=false;
+            foreach($pesanan->detailPesanan as $detail){
+                if($detail->status_pesanan == 'PO'){
+                    $isPreOrder=true;
+                    break;
+                }
             }
+
+            if($isPreOrder){
+                return response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Pesanan tidak bisa dibayar karena ada produk pre order',
+                        'a' =>$pesanan->tanggal_pesanan,
+                        'b' => Carbon::now()->addDay()->toDateTimeString(),
+                        'c'=>$pesanan->tanggal_pesanan >= Carbon::now()->addDay()->toDateTimeString()
+                    ], 400);
+                if($pesanan->tanggal_pesanan <= Carbon::now()->addDay()->toDateTimeString()){
+
+                    $pesanan->update([
+                        'status_transaksi' => 'Pesanan Dibatalkan'
+                    ]);
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Pesanan sudah melewati batas waktu pembayaran'
+                    ], 400);
+                }
+            }else{
+                if($pesanan->tanggal_pesanan <= Carbon::now()->toDateTimeString()){
+                    $pesanan->update([
+                        'status_transaksi' => 'Pesanan Dibatalkan'
+                    ]);
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Pesanan sudah melewati batas waktu pembayaran'
+                    ], 400);
+                }
+            }
+            
             $userId = auth()->user()->id;
             $hash = md5($userId . $pesanan->id_pesanan);
             $extension = $request->file('bukti_pembayaran')->guessExtension();
