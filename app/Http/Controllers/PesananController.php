@@ -550,7 +550,7 @@ class PesananController extends Controller
                     $subQuery->where('status_transaksi', 'Menunggu Konfirmasi Pesanan')
                              ->where('metode_pengiriman', 'Pengantaran Kurir Toko');
                     })->orWhere('status_transaksi', 'Menunggu Konfirmasi Pembayaran');
-                })
+                })->orderBy('created_at', 'desc')
                 ->get()
                 ->load('User')
                 ->load('DetailPesanan')
