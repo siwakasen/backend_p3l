@@ -88,16 +88,7 @@ class PesananController extends Controller
             }
 
             if($isPreOrder){
-                return response()->json(
-                    [
-                        'status' => false,
-                        'message' => 'Pesanan tidak bisa dibayar karena ada produk pre order',
-                        'a' =>$pesanan->tanggal_pesanan,
-                        'b' => Carbon::now()->addDay()->toDateTimeString(),
-                        'c'=>$pesanan->tanggal_pesanan >= Carbon::now()->addDay()->toDateTimeString()
-                    ], 400);
-                if($pesanan->tanggal_pesanan <= Carbon::now()->addDay()->toDateTimeString()){
-
+                if($pesanan->tanggal_diambil <= Carbon::now()->addDay()->toDateTimeString()){
                     $pesanan->update([
                         'status_transaksi' => 'Pesanan Dibatalkan'
                     ]);
@@ -107,7 +98,7 @@ class PesananController extends Controller
                     ], 400);
                 }
             }else{
-                if($pesanan->tanggal_pesanan <= Carbon::now()->toDateTimeString()){
+                if(Carbon::now()->toDateTimeString() > $pesanan->tanggal_diambil){
                     $pesanan->update([
                         'status_transaksi' => 'Pesanan Dibatalkan'
                     ]);
@@ -124,7 +115,7 @@ class PesananController extends Controller
             $path = $request->file('bukti_pembayaran')->storeAs('bukti_pembayaran', $hash . '.' . $extension, 'public');
             
             $pesanan->update([
-                'status_transaksi' => 'Pesanan Sudah Dibayar',
+                'status_transaksi' => 'Menunggu Konfirmasi Pembayaran',
                 'tanggal_pembayaran' => now(),
                 'bukti_pembayaran' => $hash . '.' . $extension
             ]);
