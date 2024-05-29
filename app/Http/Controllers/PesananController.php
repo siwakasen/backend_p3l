@@ -33,6 +33,7 @@ class PesananController extends Controller
                 }])
                 ->where('id_user', $id)
                 ->where('status_transaksi', 'Menunggu Pembayaran')
+                ->orderBy('tanggal_pesanan', 'dsc')
                 ->get();
             if (count($pesanan) == 0) {
                 throw new \Exception();
@@ -143,6 +144,7 @@ class PesananController extends Controller
                     }]);
                 }])
                 ->where('status_transaksi', 'Pembayaran Valid')
+                ->orderBy('tanggal_pesanan', 'dsc')
                 ->get();
             if (count($pesanan) == 0) {
                 throw new \Exception();
