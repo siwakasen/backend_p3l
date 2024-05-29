@@ -486,7 +486,7 @@ class CustomerController extends Controller
                 ->where(function ($query) {
                     $query->where('status_transaksi', 'Pesanan Sudah Selesai')
                         ->orWhere('status_transaksi', 'Pesanan Dibatalkan');
-                })
+                })->orderBy('tanggal_pesanan', 'desc')
                 ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
 
             return response()->json([
