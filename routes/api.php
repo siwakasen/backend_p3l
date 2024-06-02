@@ -19,6 +19,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\HistorySaldoController;
 use App\Http\Middleware\TokenValidation;
 
 /*
@@ -251,6 +252,16 @@ Route::prefix('administrator')->group(function () {
         Route::put('/{id}', [KategoriController::class, 'updateKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [KategoriController::class, 'deleteKategori'])->middleware('auth:sanctum', 'ability:admin');
     });
+
+    /*
+    =======================================================
+    |                   Penarikan Saldo                   |
+    =======================================================
+    */
+    Route::prefix('penarikan-saldo')->group(function () {
+        Route::get('/', [HistorySaldoController::class, 'getPengajuanTarikSaldo'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/konfirmasi/{id}', [HistorySaldoController::class, 'konfirmasiTransferSaldo'])->middleware('auth:sanctum', 'ability:admin');
+    });
 });
 
 /*
@@ -322,5 +333,13 @@ Route::prefix('customer')->group(function () {
     Route::prefix('pesanan')->group(function () {
         Route::get('/belum-bayar', [PesananController::class, 'getPesananBelumDibayar'])->middleware('auth:sanctum', 'ability:user');
         Route::post('/bayar/{id}', [PesananController::class, 'bayarPesanan'])->middleware('auth:sanctum', 'ability:user');
+    });
+
+    Route::prefix('saldo')->group(function () {
+        Route::get('/', [HistorySaldoController::class, 'getSaldo'])->middleware('auth:sanctum', 'ability:user');
+    });
+    Route::prefix('penarikan-saldo')->group(function () {
+        Route::post('/', [HistorySaldoController::class, 'pengajuanTarikSaldo'])->middleware('auth:sanctum', 'ability:user');
+        Route::get('/', [HistorySaldoController::class, 'getHistorySaldo'])->middleware('auth:sanctum', 'ability:user');
     });
 });
