@@ -91,23 +91,17 @@ class PesananController extends Controller
             }
 
             if ($isPreOrder) {
-                if ($pesanan->tanggal_diambil <= Carbon::now()->addDay()->toDateTimeString()) {
-                    $pesanan->update([
-                        'status_transaksi' => 'Pesanan Dibatalkan'
-                    ]);
+                if (Carbon::parse($pesanan->tanggal_diambil)->toDateString() <= Carbon::now()->addDay()->toDateString()) {
                     return response()->json([
                         'status' => false,
                         'message' => 'Pesanan sudah melewati batas waktu pembayaran'
                     ], 400);
                 }
             } else {
-                if (Carbon::now()->toDateTimeString() > $pesanan->tanggal_diambil) {
-                    $pesanan->update([
-                        'status_transaksi' => 'Pesanan Dibatalkan'
-                    ]);
+                if (Carbon::parse($pesanan->tanggal_diambil)->toDateString() < Carbon::now()->toDateString() ) {
                     return response()->json([
                         'status' => false,
-                        'message' => 'Pesanan sudah melewati batas waktu pembayaran'
+                        'message' => 'Pesanan sudah melewati batas waktu pembayaran',
                     ], 400);
                 }
             }
