@@ -52,7 +52,7 @@ class HistorySaldoController extends Controller
         $id_user = $user->id_user;
         
         $validator = Validator::make($request->all(), [
-            'nominal_saldo' => 'required|numeric|min:1000',
+            'nominal_saldo' => 'required|numeric|min:10000',
         ]);
 
         if($validator->fails()){
@@ -62,13 +62,20 @@ class HistorySaldoController extends Controller
                 'errors' => $validator->errors()
             ], 400);
         }
+        if($user->saldo < $request->nominal_saldo){
+            return response()->json([
+                'status' => false,
+                'message' => 'Saldo tidak mencukupi',
+                'data' => [],
+            ],400);
+        }
 
         try {
             $newHistorySaldo = new HistoriSaldo();
             $newHistorySaldo->id_user = $id_user;
             $newHistorySaldo->nominal_saldo = $request->nominal_saldo;
             $newHistorySaldo->keterangan_transaksi = 'Mengajukan Penarikan Saldo';
-            $newHistorySaldo->tanggal_transaksi = Carbon::now()->toDateTimeString();
+            $newHistorySaldo->tanggal_pengajuan = Carbon::now()->toDateTimeString();
             $newHistorySaldo->save();
             
             return response()->json([
@@ -86,7 +93,7 @@ class HistorySaldoController extends Controller
     }
 
     public function getPengajuanTarikSaldo(){
-        $history_saldo = HistoriSaldo::where('keterangan_transaksi', 'Mengajukan Penarikan Saldo')->get();
+        $history_saldo = HistoriSaldo::with('user')->where('keterangan_transaksi', 'Mengajukan Penarikan Saldo')->get();
         if(count($history_saldo) == 0){
             return response()->json([
                 'status' => false,
@@ -127,7 +134,8 @@ class HistorySaldoController extends Controller
             ],400);
         }
         try {
-            $history_saldo->keterangan_transaksi = 'Saldo sudah ditransfer';
+            $history_saldo->keterangan_transaksi = 'Saldo Sudah Ditransfer';
+            $history_saldo->tanggal_konfirmasi = Carbon::now()->toDateTimeString();
             $history_saldo->save();
 
             $user->saldo -= $history_saldo->nominal_saldo;
@@ -142,6 +150,7 @@ class HistorySaldoController extends Controller
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal mengkonfirmasi pengajuan penarikan saldo',
+                'data'=> [],
                 'errors' => $th->getMessage()
             ], 500);
         }

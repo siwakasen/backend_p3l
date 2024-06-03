@@ -15,7 +15,8 @@ class HistoriSaldo extends Model
         'id_user',
         'nominal_saldo',
         'keterangan_transaksi',
-        'tanggal_transaksi',
+        'tanggal_pengajuan',
+        'tanggal_konfirmasi'
     ];
 
     public function User()

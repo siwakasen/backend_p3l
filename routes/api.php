@@ -20,6 +20,7 @@ use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\HistorySaldoController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Middleware\TokenValidation;
 
 /*
@@ -261,6 +262,16 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('penarikan-saldo')->group(function () {
         Route::get('/', [HistorySaldoController::class, 'getPengajuanTarikSaldo'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/konfirmasi/{id}', [HistorySaldoController::class, 'konfirmasiTransferSaldo'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                   Laporan                           |
+    =======================================================
+    */
+    Route::prefix('laporan')->group(function(){
+        Route::get('/presensi-karyawan/{tahun}/{bulan}', [LaporanController::class, 'laporanPresensiKaryawan'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
+
     });
 });
 

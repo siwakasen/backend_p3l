@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('id_user')->references('id_user')->on('users')->restrictOnDelete()->restrictOnUpdate();
             $table->double('nominal_saldo');
             $table->string('keterangan_transaksi', 100);
-            $table->date('tanggal_transaksi');
+            $table->dateTime('tanggal_pengajuan');
+            $table->dateTime('tanggal_konfirmasi')->nullable();
             $table->timestamps();
         });
     }
