@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\MailVerification;
 use Illuminate\Support\Str;
 use App\Mail\MailSend;
+use App\Models\MobileTokens;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
@@ -101,6 +102,41 @@ class CustomerController extends Controller
                 'message' => 'Error: ' . $e->getMessage()
             ], 400);
         }
+    }
+
+    public function storeNotifTokens(Request $request){
+        $validate = Validator::make($request->all(), [
+            'token' => 'required',
+            'id_user' => 'required',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid credentials',
+                'errors' => $validate->errors(),
+            ], 401);
+        }
+
+        $notifToken = MobileTokens::where('id_user', $request->id_user)->where('token', $request->token)->first();
+        if ($notifToken) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Token already stored',
+                'data' => null,
+            ]);
+        } else {
+            MobileTokens::create([
+                'token' => $request->token,
+                'id_user' => $request->id_user
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Token stored successfully',
+            'data' => null,
+        ]);
     }
 
     public function emailCheck(Request $request)
@@ -493,6 +529,75 @@ class CustomerController extends Controller
                 'status' => 'success',
                 'message' => 'Transaction history fetched successfully.',
                 'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function getPesananOnProgress(){
+        $user = User::find(Auth::user()->id_user);
+
+        if ($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+        try {
+            $id = Auth::user()->id_user;
+            $data = Pesanan::where('id_user', $id)
+                ->where('status_transaksi', '!=', 'Pesanan Sudah Selesai')->where('status_transaksi', '!=', 'Pesanan Dibatalkan')
+                ->orderBy('tanggal_pesanan', 'asc')
+                ->get()->load('detailPesanan.Produk', 'detailPesanan.Hampers', 'detailPesanan.Produk.Kategori');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction history fetched successfully.',
+                'data' => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function confirmPesanan(Request $request, $id)
+    {
+        $user = User::find(Auth::user()->id_user);
+
+        if ($user == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+        try {
+            $pesanan = Pesanan::find($id);
+            if ($pesanan == null) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Pesanan not found.'
+                ], 404);
+            }
+            $validator = Validator::make($request->all(), [
+                'status_transaksi' => 'required|in:Pesanan Sudah Selesai'
+            ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $validator->errors()
+                ], 400);
+            }
+            $pesanan->update($request->only('status_transaksi'));
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Transaction updated successfully.'
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

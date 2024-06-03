@@ -50,4 +50,9 @@ class User extends Authenticatable // implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function mobileTokens()
+    {
+        return $this->hasMany(MobileTokens::class, 'id_user', 'id_user');
+    }
 }
