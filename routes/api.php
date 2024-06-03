@@ -211,6 +211,7 @@ Route::prefix('administrator')->group(function () {
     */
     Route::prefix('bahan-baku')->group(function () {
         Route::get('/', [BahanBakuController::class, 'getAllBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
+        Route::post('/catat-bahan-baku', [BahanBakuController::class, 'pemakaianBahanBakuPesananDiterima']);
         Route::get('/search', [BahanBakuController::class, 'searchBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
         Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
         Route::post('/', [BahanBakuController::class, 'insertBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
@@ -265,12 +266,13 @@ Route::prefix('administrator')->group(function () {
     Route::prefix('change-password')->group(function () {
         Route::put('/{id}', [AuthController::class, 'changePassword'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional,owner');
     });
-    
+
     Route::prefix('/pesanan')->group(function () {
         Route::get('/valid', [PesananController::class, 'getPesananValid'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/konfirmasi/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::get('/bahan-baku-kurang', [PesananController::class, 'bahanBakuKurang'])->middleware('auth:sanctum', 'ability:manajer-operasional');
-
+        Route::get('/pesanan-diproses', [PesananController::class, 'pesananDiproses']);
+        Route::post('/memproses-pesanan', [PesananController::class, 'memprosesPesanan']);
     });
 
     /*
@@ -284,6 +286,16 @@ Route::prefix('administrator')->group(function () {
         Route::post('/', [KategoriController::class, 'insertKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [KategoriController::class, 'updateKategori'])->middleware('auth:sanctum', 'ability:admin');
         Route::delete('/{id}', [KategoriController::class, 'deleteKategori'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                        Laporan                      |
+    =======================================================
+    */
+    Route::prefix('laporan')->group(function () {
+        Route::get('/penjualan-per-bulan', [PesananController::class, 'laporanPenjualanPerProduk']);
+        Route::get('/stok-bahan-baku', [BahanBakuController::class, 'laporanStokBahanBaku']);
     });
 });
 
