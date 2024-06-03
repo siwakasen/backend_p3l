@@ -16,6 +16,7 @@ use App\Http\Controllers\PembelianBahanBakuController;
 use App\Http\Controllers\BahanBakuController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Controllers\PesananController;
@@ -30,6 +31,7 @@ use App\Http\Middleware\TokenValidation;
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [CustomerController::class, 'register']);
+    Route::post('/storeNotifTokens', [CustomerController::class, 'storeNotifTokens']);
     Route::post('/email-check', [CustomerController::class, 'emailCheck']);
     Route::get('/validate-token/{token}', [CustomerController::class, 'checkTokenValidity']);
     Route::post('/verify/{token}', [CustomerController::class, 'verify']);
@@ -126,6 +128,38 @@ Route::prefix('administrator')->group(function () {
         Route::get('/{id}', [PesananController::class, 'getPesanan'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/updateInputJarak/{id}', [PesananController::class, 'updateOngkir'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/updateTotalBayar/{id}', [PesananController::class, 'updateTotalBayar'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                  Update Status Pesanan              |
+    =======================================================
+    */
+    Route::prefix('update-status-pesanan')->group(function (){
+        Route::get('/', [PesananController::class, 'getAllPesananDiproses'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/{id}', [PesananController::class, 'updateStatusPesanan'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                  Pembatalan Pesanan                 |
+    =======================================================
+    */
+
+    Route::prefix('pembatalan-pesanan')->group(function () {
+        Route::get('/', [PesananController::class, 'getReminderPesanan'])->middleware('auth:sanctum', 'ability:admin');
+        Route::put('/{id}', [PesananController::class, 'batalPesanan'])->middleware('auth:sanctum', 'ability:admin');
+    });
+
+    /*
+    =======================================================
+    |                     Laporan Pesanan                 |
+    =======================================================
+    */
+
+    Route::prefix('laporan')->group(function () {
+        Route::get('/laporan-bulanan/{year}', [LaporanController::class, 'laporanBulanan'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
+        Route::get('/penggunaan-bahan-baku/{from}/{to}', [LaporanController::class, 'penggunaanBahanBakuByPeriod'])->middleware('auth:sanctum', 'ability:manajer-operasional,owner');
     });
 
     /*
@@ -284,6 +318,11 @@ Route::prefix('customer')->group(function () {
     Route::prefix('history')->group(function () {
         Route::get('/', [CustomerController::class, 'historyTransaction'])->middleware('auth:sanctum', 'ability:user');
         Route::get('/search', [CustomerController::class, 'getHistoryPesananByStatus'])->middleware('auth:sanctum', 'ability:user');
+    });
+
+    Route::prefix('onprogress')->group(function () {
+        Route::get('/', [CustomerController::class, 'getPesananOnProgress'])->middleware('auth:sanctum', 'ability:user');
+        Route::put('/confirm/{id}', [CustomerController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:user');
     });
 
     /*

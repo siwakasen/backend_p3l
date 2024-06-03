@@ -15,6 +15,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Hampers;
 use App\Models\DetailPesanan;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Laravel\Firebase\Facades\Firebase;
 
 
 class PesananController extends Controller
@@ -95,6 +98,36 @@ class PesananController extends Controller
                     $pesanan->update([
                         'status_transaksi' => 'Pesanan Dibatalkan'
                     ]);
+                    foreach ($pesanan->detailPesanan as $detail) {
+                        if ($detail->status_pesanan == 'Ready') {
+                            $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                            $produk->update([
+                                'stok_produk' => $produk->stok_produk + $detail->jumlah
+                            ]);
+                        } else if ($detail->status_pesanan == 'PO') {
+                            $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)
+                                ->where('tanggal', $pesanan->tanggal_diambil)
+                                ->first();
+                            if ($limitProduk != null) {
+                                $limitProduk->update([
+                                    'limit' => $limitProduk->limit + $detail->jumlah
+                                ]);
+                            }
+                        } else {
+                            foreach ($detail->Hampers->DetailHampers as $detailHampers) {
+                                if ($detailHampers->id_produk != null) {
+                                    $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)
+                                        ->where('tanggal', $pesanan->tanggal_diambil)
+                                        ->first();
+                                    if ($limitProduk != null) {
+                                        $limitProduk->update([
+                                            'limit' => $limitProduk->limit + $detail->jumlah
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     return response()->json([
                         'status' => false,
                         'message' => 'Pesanan sudah melewati batas waktu pembayaran'
@@ -105,6 +138,36 @@ class PesananController extends Controller
                     $pesanan->update([
                         'status_transaksi' => 'Pesanan Dibatalkan'
                     ]);
+                    foreach ($pesanan->detailPesanan as $detail) {
+                        if ($detail->status_pesanan == 'Ready') {
+                            $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                            $produk->update([
+                                'stok_produk' => $produk->stok_produk + $detail->jumlah
+                            ]);
+                        } else if ($detail->status_pesanan == 'PO') {
+                            $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)
+                                ->where('tanggal', $pesanan->tanggal_diambil)
+                                ->first();
+                            if ($limitProduk != null) {
+                                $limitProduk->update([
+                                    'limit' => $limitProduk->limit + $detail->jumlah
+                                ]);
+                            }
+                        } else {
+                            foreach ($detail->Hampers->DetailHampers as $detailHampers) {
+                                if ($detailHampers->id_produk != null) {
+                                    $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)
+                                        ->where('tanggal', $pesanan->tanggal_diambil)
+                                        ->first();
+                                    if ($limitProduk != null) {
+                                        $limitProduk->update([
+                                            'limit' => $limitProduk->limit + $detail->jumlah
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     return response()->json([
                         'status' => false,
                         'message' => 'Pesanan sudah melewati batas waktu pembayaran'
@@ -362,6 +425,7 @@ class PesananController extends Controller
             ], 404);
         }
     }
+
     public function checkout(Request $request)
     {
         try {
@@ -406,7 +470,7 @@ class PesananController extends Controller
                     'status_pesanan' => $data['statusPesanan'] ?? null,
                     'subtotal' => $dp['subtotal']
                 ]);
-                if ($data['isCart']) {
+                if (isset($data['isCart'])) {
                     if (isset($dp['id_produk']) && !isset($dp['id_hampers'])) {
                         DB::table('detail_pesanan')
                             ->where('id_pesanan', $cart->id_pesanan)
@@ -551,6 +615,7 @@ class PesananController extends Controller
             ], 500);
         }
     }
+
     public function getAllPesananMasuk()
     {
         return response()->json([
@@ -640,6 +705,131 @@ class PesananController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully update total bayar data.',
+            'data' => $pesanan
+        ], 200);
+    }
+
+    public function getAllPesananDiproses() {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully fetch pesanan data.',
+            'data' => Pesanan::where('status_transaksi', 'Pesanan Sedang Diproses')->orWhere('status_transaksi', 'Pesanan Siap Di Pick Up')->orderBy('tanggal_pesanan', 'desc')
+                ->get()
+                ->load('User')
+                ->load('DetailPesanan')
+        ], 200);
+    }
+
+    public function updateStatusPesanan(Request $request, $id) {
+        $pesanan = Pesanan::where('id_pesanan', $id)->first();
+        if ($pesanan == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan not found.'
+            ], 404);
+        }
+
+        $status_transaksi = $request->status_transaksi;
+        $pesanan->status_transaksi = $status_transaksi == 'Pesanan Sudah Diambil' ? 'Pesanan Sudah Selesai' : $status_transaksi;
+        $pesanan->save();
+
+        $year = date("y", strtotime($pesanan->tanggal_pesanan));
+        $month = date("m", strtotime($pesanan->tanggal_pesanan));
+        $no_nota = "{$year}.{$month}.{$pesanan->id_pesanan}";
+        $notification = Notification::create($pesanan->status_transaksi, 'Hai ' . $pesanan->User->nama_user . ', pesanan dengan no nota ' . $no_nota . ' kamu sudah ' . strtolower(substr($pesanan->status_transaksi, 8)) . '. Terima kasih sudah berbelanja di Atma Kitchen!');
+
+        foreach ($pesanan->User->MobileTokens as $data) {
+            $message = CloudMessage::withTarget('token', $data->token)
+                ->withNotification($notification);
+
+            Firebase::messaging()->send($message);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully update status pesanan data.',
+            'data' => $pesanan,
+
+        ], 200);
+    }
+
+    public function getReminderPesanan() {
+        $pesanan = Pesanan::where('status_transaksi', 'Menunggu Pembayaran')->get()->load('User');
+        $reminder = [];
+        foreach ($pesanan as $data) {
+            $date = date("Y-m-d", strtotime($data->tanggal_diambil));
+            $now = date("Y-m-d");
+            $diff = strtotime($date) - strtotime($now);
+            $diff = $diff / (60 * 60 * 24);
+            if ($diff <= 1) {
+                array_push($reminder, $data);
+            }
+        }        
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully fetch reminder pesanan data.',
+            'data' => $reminder
+        ], 200);
+    }
+
+    public function batalPesanan($id) {
+        $pesanan = Pesanan::where('id_pesanan', $id)->first();
+        
+        if ($pesanan == null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Pesanan not found.'
+            ], 404);
+        }
+
+        $date = date("Y-m-d", strtotime($pesanan->tanggal_diambil));
+        foreach ($pesanan->detailPesanan as $detail) {
+            if ($detail->id_produk != null) {
+                if ($detail->Produk->id_penitip != null) {
+                    $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                    $produk->update([
+                        'stok_produk' => $produk->stok_produk + $detail->jumlah
+                    ]);
+                } else {
+                    if ($detail->status_pesanan == 'Ready') {
+                        $produk = Produk::where('id_produk', $detail->id_produk)->first();
+                        $produk->update([
+                            'stok_produk' => $produk->stok_produk + $detail->jumlah
+                        ]);
+                    } else {
+                        $limitProduk = LimitProduk::where('id_produk', $detail->id_produk)
+                            ->where('tanggal', $date)
+                            ->first();
+                        if ($limitProduk != null) {
+                            $limitProduk->update([
+                                'limit' => $limitProduk->limit + $detail->jumlah
+                            ]);
+                        }
+                    }
+                }
+            } else {
+                foreach ($detail->Hampers->DetailHampers as $detailHampers) {
+                    if ($detailHampers->id_produk != null) {
+                        $limitProduk = LimitProduk::where('id_produk', $detailHampers->id_produk)
+                            ->where('tanggal', $date)
+                            ->first();
+                        if ($limitProduk != null) {
+                            $limitProduk->update([
+                                'limit' => $limitProduk->limit + $detail->jumlah
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        $pesanan->status_transaksi = 'Pesanan Dibatalkan';
+        $pesanan->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Successfully cancel pesanan data.',
             'data' => $pesanan
         ], 200);
     }
