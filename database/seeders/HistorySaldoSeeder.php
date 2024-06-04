@@ -24,13 +24,13 @@ class HistorySaldoSeeder extends Seeder
         //DB::table('histori_saldo')->delete();
         DB::table('histori_saldo')->insert(
             [
-                ['id_histori_saldo' => 1, 'id_user' => 1, 'nominal_saldo' => 205000, 'keterangan_transaksi' => 'Pengembalian Saldo', 'tanggal_transaksi' => '2024-03-01','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 2, 'id_user' => 4, 'nominal_saldo' => 305000, 'keterangan_transaksi' => 'Pengembalian Saldo', 'tanggal_transaksi' => '2024-03-04','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 3, 'id_user' => 3, 'nominal_saldo' => 105000, 'keterangan_transaksi' => 'Pengembalian Saldo', 'tanggal_transaksi' => '2024-03-06','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 4, 'id_user' => 6, 'nominal_saldo' => 105000, 'keterangan_transaksi' => 'Pengembalian Saldo', 'tanggal_transaksi' => '2024-03-10','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 5, 'id_user' => 2, 'nominal_saldo' => 305000, 'keterangan_transaksi' => 'Pengembalian Saldo', 'tanggal_transaksi' => '2024-03-14','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 6, 'id_user' => 2, 'nominal_saldo' => 200000, 'keterangan_transaksi' => 'Penarikan Saldo', 'tanggal_transaksi' => '2024-03-15','created_at' => now(),'updated_at' => now()],
-                ['id_histori_saldo' => 7, 'id_user' => 4, 'nominal_saldo' => 200000, 'keterangan_transaksi' => 'Penarikan Saldo', 'tanggal_transaksi' => '2024-03-04','created_at' => now(),'updated_at' => now()]
+                ['id_histori_saldo' => 1, 'id_user' => 1, 'nominal_saldo' => 205000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-01','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 2, 'id_user' => 4, 'nominal_saldo' => 305000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-04','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 3, 'id_user' => 3, 'nominal_saldo' => 105000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-06','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 4, 'id_user' => 6, 'nominal_saldo' => 105000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-10','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 5, 'id_user' => 2, 'nominal_saldo' => 305000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-14','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 6, 'id_user' => 2, 'nominal_saldo' => 200000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-15','created_at' => now(),'updated_at' => now()],
+                ['id_histori_saldo' => 7, 'id_user' => 4, 'nominal_saldo' => 200000, 'keterangan_transaksi' => 'Mengajukan Penarikan Saldo', 'tanggal_pengajuan' => '2024-03-04','created_at' => now(),'updated_at' => now()]
             ]
             );
     }
