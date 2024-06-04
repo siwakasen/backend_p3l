@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Hampers;
 use App\Models\DetailPesanan;
+use App\Models\PencatatanBahanBaku;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Laravel\Firebase\Facades\Firebase;
@@ -608,7 +609,8 @@ class PesananController extends Controller
         ], 200);
     }
 
-    public function getAllPesananDiproses() {
+    public function getAllPesananDiproses()
+    {
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully fetch pesanan data.',
@@ -619,7 +621,8 @@ class PesananController extends Controller
         ], 200);
     }
 
-    public function updateStatusPesanan(Request $request, $id) {
+    public function updateStatusPesanan(Request $request, $id)
+    {
         $pesanan = Pesanan::where('id_pesanan', $id)->first();
         if ($pesanan == null) {
             return response()->json([
@@ -652,7 +655,8 @@ class PesananController extends Controller
         ], 200);
     }
 
-    public function getReminderPesanan() {
+    public function getReminderPesanan()
+    {
         $pesanan = Pesanan::where('status_transaksi', 'Menunggu Pembayaran')->get()->load('User');
         $reminder = [];
         foreach ($pesanan as $data) {
@@ -663,7 +667,7 @@ class PesananController extends Controller
             if ($diff <= 1) {
                 array_push($reminder, $data);
             }
-        }        
+        }
 
         return response()->json([
             'status' => 'success',
@@ -672,9 +676,10 @@ class PesananController extends Controller
         ], 200);
     }
 
-    public function batalPesanan($id) {
+    public function batalPesanan($id)
+    {
         $pesanan = Pesanan::where('id_pesanan', $id)->first();
-        
+
         if ($pesanan == null) {
             return response()->json([
                 'status' => 'error',
@@ -721,15 +726,205 @@ class PesananController extends Controller
                     }
                 }
             }
+
+
+            $pesanan->status_transaksi = 'Pesanan Dibatalkan';
+            $pesanan->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully cancel pesanan data.',
+                'data' => $pesanan
+            ], 200);
         }
+    }
 
-        $pesanan->status_transaksi = 'Pesanan Dibatalkan';
-        $pesanan->save();
+    public function laporanPenjualanPerProduk(Request $request)
+    {
+        try {
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully cancel pesanan data.',
-            'data' => $pesanan
-        ], 200);
+            $query = $request->query('date');
+            $yearMonth = substr($query, 0, 7);
+
+            $pesanan = Pesanan::where('status_transaksi', 'Pesanan Sudah Selesai')->where(fn ($query) => $query->where('tanggal_diambil', 'like', $yearMonth . '%'))->with(['detailPesanan.Produk', 'detailPesanan.Hampers'])->get();
+
+            $laporan = [
+                'produk' => [],
+                'hampers' => []
+            ];
+
+            foreach ($pesanan as $p) {
+                foreach ($p['DetailPesanan'] as $dp) {
+                    if ($dp['id_produk'] != null) {
+                        $found = array_filter($laporan['produk'], function ($item) use ($dp) {
+                            return $item['id_produk'] == $dp['id_produk'];
+                        });
+                        if (count($found) == 0) {
+                            $laporan['produk'][] = [
+                                'id_produk' => $dp['id_produk'],
+                                'nama_produk' => $dp['produk']['nama_produk'],
+                                'harga_produk' => $dp['produk']['harga_produk'],
+                                'jumlah' => $dp['jumlah'],
+                                'subtotal' => $dp['subtotal']
+                            ];
+                        } else {
+                            foreach ($laporan['produk'] as $key => $value) {
+                                if ($value['id_produk'] == $dp['id_produk']) {
+                                    $laporan['produk'][$key]['jumlah'] += $dp['jumlah'];
+                                    $laporan['produk'][$key]['subtotal'] += $dp['subtotal'];
+                                }
+                            }
+                        }
+                    } else {
+                        if ($dp['id_hampers'] != null) {
+                            $found = array_filter($laporan['hampers'], function ($item) use ($dp) {
+                                return $item['id_hampers'] == $dp['id_hampers'];
+                            });
+                            if (count($found) == 0) {
+                                $laporan['hampers'][] = [
+                                    'id_hampers' => $dp['id_hampers'],
+                                    'nama_hampers' => $dp['hampers']['nama_hampers'],
+                                    'harga_hampers' => $dp['hampers']['harga_hampers'],
+                                    'jumlah' => $dp['jumlah'],
+                                    'subtotal' => $dp['subtotal']
+                                ];
+                            } else {
+                                foreach ($laporan['hampers'] as $key => $value) {
+                                    if ($value['id_hampers'] == $dp['id_hampers']) {
+                                        $laporan['hampers'][$key]['jumlah'] += $dp['jumlah'];
+                                        $laporan['hampers'][$key]['subtotal'] += $dp['subtotal'];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Successfully fetch laporan penjualan per produk data.',
+                'data' => $laporan,
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Laporan tidak ditemukan',
+                'data' => []
+            ], 404);
+        }
+    }
+
+    public function pesananDiproses()
+    {
+        try {
+            $today = Carbon::now()->toDateString();
+            $pesanan = Pesanan::where('status_transaksi', 'Pesanan Diterima')->where(DB::raw("DATE_SUB(tanggal_diambil, INTERVAL 1 DAY)"), '=', $today)->get();
+            if (count($pesanan) == 0) {
+                throw new \Exception();
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Success get pesanan diproses',
+                'data' => $pesanan
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pesanan not found',
+                'error' => $th->getMessage(),
+                'data' => []
+            ], 404);
+        }
+    }
+
+    public function memprosesPesanan(Request $request)
+    {
+        try {
+            $input = $request->input('data');
+            $data = [];
+
+            foreach ($input as $item) {
+                $pesanan = Pesanan::where('id_pesanan', $item)->with([
+                    'detailPesanan.produk.resep.detailResep',
+                    'detailPesanan.hampers.detailHampers.produk.resep.detailResep'
+                ])
+                    ->get();
+
+                if (count($pesanan) == 0) {
+                    throw new \Exception();
+                }
+
+                $bahanBakuUsage = [];
+
+                foreach ($pesanan as $order) {
+                    foreach ($order->detailPesanan as $detail) {
+                        if ($detail->produk && $detail->produk->resep) {
+                            foreach ($detail->produk->resep->detailResep as $detailResep) {
+                                if (isset($bahanBakuUsage[$detailResep->id_bahan_baku])) {
+                                    $bahanBakuUsage[$detailResep->id_bahan_baku] += $detailResep->jumlah * $detail->jumlah;
+                                } else {
+                                    $bahanBakuUsage[$detailResep->id_bahan_baku] = $detailResep->jumlah * $detail->jumlah;
+                                }
+                            }
+                        }
+
+                        if ($detail->hampers != null && $detail->hampers->detailHampers != null) {
+                            foreach ($detail->hampers->detailHampers as $hampersDetail) {
+                                if ($hampersDetail->produk && $hampersDetail->produk->resep) {
+                                    foreach ($hampersDetail->produk->resep->detailResep as $detailResep) {
+                                        if (isset($bahanBakuUsage[$detailResep->id_bahan_baku])) {
+                                            $bahanBakuUsage[$detailResep->id_bahan_baku] += $detailResep->jumlah * $detail->jumlah;
+                                        } else {
+                                            $bahanBakuUsage[$detailResep->id_bahan_baku] = $detailResep->jumlah * $detail->jumlah;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                foreach ($bahanBakuUsage as $key => $value) {
+                    $bahanBaku = BahanBaku::where('id_bahan_baku', $key)->first();
+                    if ($bahanBaku->stok < $value) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Bahan baku untuk pesanan ' . $pesanan[0]->no_nota . ' tidak mencukupi',
+                            'data' => $bahanBaku
+                        ]);
+                    }
+                    PencatatanBahanBaku::create([
+                        'id_bahan_baku' => $key,
+                        'jumlah' => $value,
+                        'tanggal_pencatatan' => now()->timezone('Asia/Jakarta')
+                    ]);
+
+                    $bahanBaku->update([
+                        'stok' => $bahanBaku->stok - $value
+                    ]);
+                }
+
+                $order = Pesanan::where('id_pesanan', $item)->first();
+                $order->update([
+                    'status_transaksi' => 'Pesanan Sedang Diproses'
+                ]);
+                $data[] = $order;
+            }
+
+
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Pesanan berhasil diproses',
+                'data' => $data
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Pesanan not found',
+                'error' => $th->getMessage()
+            ], 404);
+        }
     }
 }
