@@ -27,22 +27,26 @@ class LaporanController extends Controller
             }
 
             try {
-                $karyawan = Karyawan::with(['Role' => function ($query) {
+                $karyawan = Karyawan::with(['Role' => function ($query ) {
                     $query->select('id_role', 'nama_role','nominal_gaji');
                 }])
                 ->select('karyawan.id_karyawan', 'karyawan.id_role', 'karyawan.nama_karyawan', 'karyawan.tanggal_masuk', 'karyawan.bonus_gaji')
-                    ->selectSub(function ($query) {
+                    ->selectSub(function ($query) use ($tahun, $bulan) {
                         $query->from('presensi')
                             ->selectRaw('count(id_karyawan)')
                             ->whereColumn('id_karyawan', 'karyawan.id_karyawan')
-                            ->where('status', 'Masuk');
-                    }, 'Jumlah Hadir')
-                    ->selectSub(function ($query) {
+                            ->where('status', 'Masuk')
+                            ->whereYear('tanggal', $tahun)
+                            ->whereMonth('tanggal', $bulan);
+                    }, 'jumlah_hadir')
+                    ->selectSub(function ($query) use ($tahun, $bulan) {
                         $query->from('presensi')
                             ->selectRaw('count(id_karyawan)')
                             ->whereColumn('id_karyawan', 'karyawan.id_karyawan')
-                            ->where('status', 'Tidak Masuk');
-                    }, 'Jumlah Bolos')
+                            ->where('status', 'Tidak Masuk')
+                            ->whereYear('tanggal', $tahun)
+                            ->whereMonth('tanggal', $bulan);
+                    }, 'jumlah_bolos')
                     ->where('id_karyawan', '!=', 1)
                     ->get();
                 return response()->json([
@@ -59,22 +63,6 @@ class LaporanController extends Controller
                         'data' => []
                     ], 404);
                 }
-                // $laporan =[
-                //     'bulan' => $bulan,
-                //     'tahun' => $tahun,
-                //     'tanggal_cetak'=> Carbon::now()->toDateString('Y-m-d'),
-                //     'total'=> 
-                //     'presensi'=>[
-                //         foreach($presensi as $data){
-                //             'nama' => $data->id_karyawan,
-                //             'jumlah_hadir' => $data->karyawan->nama,
-                //             'jumlah_bolos' => $data->tanggal,
-                //             'honor_harian' => $data->jam_masuk,
-                //             'bonus_rajin' => $data->jam_pulang,
-                //             'total' => $data->status
-                //         }
-                //     ]
-                // ];
                 return response()->json([
                     'status' => true,
                     'message' => 'Laporan presensi karyawan berhasil diambil',
