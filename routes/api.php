@@ -21,7 +21,6 @@ use App\Http\Controllers\PenitipController;
 use App\Http\Controllers\PengeluaranLainController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\HistorySaldoController;
-use App\Http\Controllers\LaporanController;
 use App\Http\Middleware\TokenValidation;
 
 /*
