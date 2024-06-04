@@ -306,6 +306,8 @@ Route::prefix('administrator')->group(function () {
     */
     Route::prefix('laporan')->group(function(){
         Route::get('/presensi-karyawan/{tahun}/{bulan}', [LaporanController::class, 'laporanPresensiKaryawan'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
+        Route::get('/transaksi-penitip/{tahun}/{bulan}', [LaporanController::class, 'laporanTransaksiPenitip'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
+        Route::get('/cashflow/{tahun}/{bulan}', [LaporanController::class, 'laporanCashflow'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
         Route::get('/penjualan-per-bulan', [PesananController::class, 'laporanPenjualanPerProduk'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
         Route::get('/stok-bahan-baku', [BahanBakuController::class, 'laporanStokBahanBaku'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
     });

@@ -9,7 +9,11 @@ use App\Models\BahanBaku;
 use App\Models\DetailPesanan;
 use Illuminate\Http\Request;
 use App\Models\Pesanan;
+use App\Models\Penitip;
 use Carbon\Carbon;
+use App\Models\PembelianBahanBaku;
+use App\Models\PengeluaranLain;
+use Illuminate\Support\Facades\DB; 
 
 class LaporanController extends Controller
 {
@@ -177,6 +181,165 @@ class LaporanController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'Gagal mengambil data laporan presensi karyawan',
+                    'data' => [],
+                    'error' => $th->getMessage()    
+                ], 500);
+            }
+        }
+
+        public function laporanTransaksiPenitip($tahun, $bulan){
+            if($bulan < 1 || $bulan > 12){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Bulan tidak valid',
+                    'data' => []
+                ], 400);
+            }
+            if($tahun < 1){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tahun tidak valid',
+                    'data' => []
+                ], 400);
+            }
+
+            try {
+                $laporanPenitip = Penitip::with(['Produk' => function ($query) use ($tahun, $bulan) {
+                    $query->withCount(['detailPesanan as Qty' => function ($query) use ($tahun, $bulan) {
+                        $query->select(DB::raw('COALESCE(SUM(jumlah), 0)'))
+                            ->whereHas('Pesanan', function ($query) use ($tahun, $bulan) {
+                                $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                                    ->whereYear('tanggal_pesanan', $tahun)
+                                    ->whereMonth('tanggal_pesanan', $bulan);
+                            });
+                    }]);
+                }])->select('id_penitip','nama_penitip','no_hp','email')
+                    ->get();
+                
+                
+                if($laporanPenitip->count() == 0){
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Data laporan transaksi penitip tidak ditemukan',
+                        'data' => []
+                    ], 404);
+                }
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Laporan transaksi penitip berhasil diambil',
+                    'data' => $laporanPenitip,
+                ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gagal mengambil data laporan transaksi penitip',
+                    'data' => [],
+                    'error' => $th->getMessage()    
+                ], 500);
+            }
+        }
+
+        public function laporanCashflow($tahun, $bulan){
+            if($bulan < 1 || $bulan > 12){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Bulan tidak valid',
+                    'data' => []
+                ], 400);
+            }
+            if($tahun < 1){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Tahun tidak valid',
+                    'data' => []
+                ], 400);
+            }
+
+            try {
+                //pendapatan 
+                $penjualan = Pesanan::select('id_pesanan','tanggal_pesanan','total_harga','status_transaksi', 'tip')
+                    ->where('status_transaksi', 'Pesanan Sudah Selesai')
+                    ->whereYear('tanggal_pesanan', $tahun)
+                    ->whereMonth('tanggal_pesanan', $bulan)
+                    ->sum('total_harga');
+                $tip = Pesanan::select('id_pesanan','tanggal_pesanan','total_harga','status_transaksi', 'tip')
+                    ->where('status_transaksi', 'Pesanan Sudah Selesai')
+                    ->whereYear('tanggal_pesanan', $tahun)
+                    ->whereMonth('tanggal_pesanan', $bulan)
+                    ->sum('tip');
+
+                $karyawans = Karyawan::with('Role')
+                    ->where('id_karyawan', '!=', 1)
+                    ->get();
+                $totalPerKarayawan = [];
+                foreach($karyawans as $karyawan){
+                    $totalPerKarayawan[] = [
+                        'id_karyawan' => $karyawan->id_karyawan,
+                        'total' => $karyawan->Role->nominal_gaji + $karyawan->bonus_gaji
+                    ];
+                }
+                $pengeluaranGaji =  array_sum(array_column($totalPerKarayawan, 'total'));
+                
+                $penitips = Penitip::with(['Produk' => function ($query) use ($tahun, $bulan) {
+                    $query->withCount(['detailPesanan as Qty' => function ($query) use ($tahun, $bulan) {
+                        $query->select(DB::raw('COALESCE(SUM(jumlah), 0)'))
+                            ->whereHas('Pesanan', function ($query) use ($tahun, $bulan) {
+                                $query->where('status_transaksi', 'Pesanan Sudah Selesai')
+                                    ->whereYear('tanggal_pesanan', $tahun)
+                                    ->whereMonth('tanggal_pesanan', $bulan);
+                            });
+                    }]);
+                }])->select('id_penitip','nama_penitip','no_hp','email')
+                    ->get();
+                
+                $pengeluaranBahanBaku = PembelianBahanBaku::whereYear('tanggal_pembelian', $tahun)
+                    ->whereMonth('tanggal_pembelian', $bulan)
+                    ->sum('harga');
+
+                $pengeluaranLain = PengeluaranLain::
+                    whereYear('tanggal_pengeluaran', $tahun)
+                    ->whereMonth('tanggal_pengeluaran', $bulan)
+                    ->get();
+
+                //pengeluaran to penitip
+                $totalPerPenitip = [];
+                foreach ($penitips as $penitip) {
+                    $total = 0;
+                    foreach ($penitip->Produk as $produk) {
+                        $total += $produk->Qty * $produk->harga_produk;
+                    }
+                    $totalPerPenitip[] = [
+                        'id_penitip' => $penitip->id_penitip,
+                        'total' => ($total-$total*0.2),
+                    ];
+                }
+                $pembayaranPenitip =  array_sum(array_column($totalPerPenitip, 'total'));
+                $totalPengLain = 0;
+                foreach($pengeluaranLain as $pengeluaran){
+                    $totalPengLain += $pengeluaran->nominal_pengeluaran;
+                }
+                $total = $penjualan + $tip - $pengeluaranGaji - $pembayaranPenitip - $pengeluaranBahanBaku - $totalPengLain;
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Laporan cashflow berhasil diambil',
+                    'data'=>[
+                        'total'=> $total,
+                        'pendapatan'=>[
+                            'penjualan' => $penjualan,
+                            'tip' => $tip
+                        ],
+                        'pengeluaran'=>[
+                            'gaji' => $pengeluaranGaji,
+                            'penitip' => $pembayaranPenitip,
+                            'bahan_baku' => $pengeluaranBahanBaku,
+                        ],
+                        'pengeluaran_lain' => $pengeluaranLain
+                    ]
+                ], 200);
+            } catch (\Throwable $th) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Gagal mengambil data laporan cashflow',
                     'data' => [],
                     'error' => $th->getMessage()    
                 ], 500);

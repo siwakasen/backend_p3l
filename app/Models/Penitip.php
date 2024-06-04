@@ -16,4 +16,9 @@ class Penitip extends Model
         'no_hp',
         'email'
     ];
+
+    public function Produk()
+    {
+        return $this->hasMany(Produk::class, 'id_penitip', 'id_penitip');
+    }
 }

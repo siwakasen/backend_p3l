@@ -34,6 +34,10 @@ class Produk extends Model
         return $this->belongsTo(Penitip::class, 'id_penitip', 'id_penitip');
     }
 
+    public function DetailPesanan(){
+        return $this->hasMany(DetailPesanan::class, 'id_produk', 'id_produk');
+    }
+
     public function Resep()
     {
         return $this->belongsTo(Resep::class, 'id_resep', 'id_resep');
