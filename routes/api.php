@@ -135,7 +135,7 @@ Route::prefix('administrator')->group(function () {
     |                  Update Status Pesanan              |
     =======================================================
     */
-    Route::prefix('update-status-pesanan')->group(function (){
+    Route::prefix('update-status-pesanan')->group(function () {
         Route::get('/', [PesananController::class, 'getAllPesananDiproses'])->middleware('auth:sanctum', 'ability:admin');
         Route::put('/{id}', [PesananController::class, 'updateStatusPesanan'])->middleware('auth:sanctum', 'ability:admin');
     });
@@ -211,7 +211,7 @@ Route::prefix('administrator')->group(function () {
     */
     Route::prefix('bahan-baku')->group(function () {
         Route::get('/', [BahanBakuController::class, 'getAllBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
-        Route::post('/catat-bahan-baku', [BahanBakuController::class, 'pemakaianBahanBakuPesananDiterima']);
+        Route::post('/catat-bahan-baku', [BahanBakuController::class, 'pemakaianBahanBakuPesananDiterima'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
         Route::get('/search', [BahanBakuController::class, 'searchBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
         Route::get('/{id}', [BahanBakuController::class, 'getBahanBaku'])->middleware('auth:sanctum', 'ability:admin,manajer-operasional');
         Route::post('/', [BahanBakuController::class, 'insertBahanBaku'])->middleware('auth:sanctum', 'ability:admin');
@@ -271,8 +271,8 @@ Route::prefix('administrator')->group(function () {
         Route::get('/valid', [PesananController::class, 'getPesananValid'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::put('/konfirmasi/{id}', [PesananController::class, 'confirmPesanan'])->middleware('auth:sanctum', 'ability:manajer-operasional');
         Route::get('/bahan-baku-kurang', [PesananController::class, 'bahanBakuKurang'])->middleware('auth:sanctum', 'ability:manajer-operasional');
-        Route::get('/pesanan-diproses', [PesananController::class, 'pesananDiproses']);
-        Route::post('/memproses-pesanan', [PesananController::class, 'memprosesPesanan']);
+        Route::get('/pesanan-diproses', [PesananController::class, 'pesananDiproses'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
+        Route::post('/memproses-pesanan', [PesananController::class, 'memprosesPesanan'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
     });
 
     /*
@@ -294,8 +294,8 @@ Route::prefix('administrator')->group(function () {
     =======================================================
     */
     Route::prefix('laporan')->group(function () {
-        Route::get('/penjualan-per-bulan', [PesananController::class, 'laporanPenjualanPerProduk']);
-        Route::get('/stok-bahan-baku', [BahanBakuController::class, 'laporanStokBahanBaku']);
+        Route::get('/penjualan-per-bulan', [PesananController::class, 'laporanPenjualanPerProduk'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
+        Route::get('/stok-bahan-baku', [BahanBakuController::class, 'laporanStokBahanBaku'])->middleware('auth:sanctum', 'ability:owner,manajer-operasional');
     });
 });
 

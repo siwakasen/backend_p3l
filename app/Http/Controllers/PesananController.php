@@ -15,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Hampers;
 use App\Models\DetailPesanan;
+use App\Models\PencatatanBahanBaku;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Laravel\Firebase\Facades\Firebase;
@@ -994,6 +995,12 @@ class PesananController extends Controller
                             'data' => $bahanBaku
                         ]);
                     }
+                    PencatatanBahanBaku::create([
+                        'id_bahan_baku' => $key,
+                        'jumlah' => $value,
+                        'tanggal_pencatatan' => now()->timezone('Asia/Jakarta')
+                    ]);
+
                     $bahanBaku->update([
                         'stok' => $bahanBaku->stok - $value
                     ]);
@@ -1005,6 +1012,8 @@ class PesananController extends Controller
                 ]);
                 $data[] = $order;
             }
+
+
 
             return response()->json([
                 'status' => true,
