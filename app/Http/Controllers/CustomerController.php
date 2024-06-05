@@ -585,16 +585,9 @@ class CustomerController extends Controller
                     'message' => 'Pesanan not found.'
                 ], 404);
             }
-            $validator = Validator::make($request->all(), [
-                'status_transaksi' => 'required|in:Pesanan Sudah Selesai'
+            $pesanan->update([
+                'status_transaksi' => 'Pesanan Sudah Selesai'
             ]);
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => $validator->errors()
-                ], 400);
-            }
-            $pesanan->update($request->only('status_transaksi'));
             return response()->json([
                 'status' => 'success',
                 'message' => 'Transaction updated successfully.'

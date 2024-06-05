@@ -641,10 +641,14 @@ class PesananController extends Controller
         $notification = Notification::create($pesanan->status_transaksi, 'Hai ' . $pesanan->User->nama_user . ', pesanan dengan no nota ' . $no_nota . ' kamu sudah ' . strtolower(substr($pesanan->status_transaksi, 8)) . '. Terima kasih sudah berbelanja di Atma Kitchen!');
 
         foreach ($pesanan->User->MobileTokens as $data) {
-            $message = CloudMessage::withTarget('token', $data->token)
-                ->withNotification($notification);
+            try {
+                $message = CloudMessage::withTarget('token', $data->token)
+                    ->withNotification($notification);
 
-            Firebase::messaging()->send($message);
+                Firebase::messaging()->send($message);
+            } catch (\Throwable $th) {
+                continue;
+            }
         }
 
         return response()->json([
